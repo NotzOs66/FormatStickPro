@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">FormatStickPro</string>
+    <string name="status_waiting">Waiting for you to plug in the stick…</string>
+    <string name="label_file_system">File System:</string>
+    <string name="label_cluster_size">Cluster Size:</string>
+    <string name="label_partition_table">Partition Table:</string>
+    <string name="btn_format">Format stick (USB SCSI)</string>
+    <string name="status_ready_to_format">Stick ready to format: %1$s</string>
+    <string name="status_disconnected">Stick disconnected. Waiting…</string>
+    <string name="status_device_found">Stick found: %1$s\nRequesting permission…</string>
+    <string name="status_format_success">Victory! The stick has been formatted.</string>
+    <string name="status_format_error">Error! Something went wrong during writing.</string>
+    <string name="status_error_generic">ERROR: %1$s</string>
+    <string name="status_stage">Stage: %1$s</string>
+    <string name="status_starting">Starting formatting…</string>
+    <string name="status_check_notification">Check the notification bar for progress!</string>
+    <string name="progress_percentage">%1$d%%</string>
+    <string name="btn_lang">EN</string>
+    <string name="permission_denied">Permission denied!</string>
+    <string name="permission_denied_text">Permission denied!</string>
+    <string name="notif_title">FormatStickPro</string>
+    <string name="notif_preparing">Preparing stick…</string>
+    <string name="notif_success_title">Format Successful!</string>
+    <string name="notif_error_title">Format Failed</string>
+    <string name="notif_success_text">Your stick is ready to use.</string>
+    <string name="notif_error_text">Oops! Something went wrong.</string>
+    <string name="notif_progress">Formatting: %1$d%%</string>
+    <string name="notif_channel_name">USB Formatting</string>
+    <string name="error_usb_access">USB access error.</string>
+    <string name="stage_initializing">Cleaning stick…</string>
+    <string name="stage_ntfs">Creating NTFS system…</string>
+    <string name="stage_mft">Configuring MFT tables…</string>
+    <string name="stage_boot">Writing boot sector…</string>
+    <string name="stage_sync">Syncing data…</string>
+    <string name="stage_compression_info">Info: Compression disabled (standard).</string>
+    <string name="stage_success">Formatting completed successfully!</string>
+    <string name="stage_error">Error: %1$s</string>
+
+    <string name="about_title">About FormatStickPro</string>
+    <string name="about_description">A professional tool for formatting USB devices directly from Android using native SCSI drivers. &lt;br/&gt;&lt;br/&gt;&lt;b&gt;Telegram Support:&lt;/b&gt; &lt;a href="https://t.me/NotzOs66"&gt;t.me/NotzOs66&lt;/a&gt;</string>
+    <string name="about_legal_notice">This program is Free Software, distributed under the GNU GPL v3 license. &lt;br/&gt;&lt;br/&gt;&lt;font color="#FF5252"&gt;&lt;b&gt;WARNING:&lt;/b&gt;&lt;/font&gt; Use at your own risk. The author is not responsible for any data loss or hardware damage.</string>
+    <string name="about_libraries_title">Open Source libraries used:</string>
+    <string name="about_libraries_content">
+        • &lt;b&gt;NTFS-3G&lt;/b&gt; (GPLv2/LGPLv2)&lt;br/&gt;
+        • &lt;b&gt;e2fsprogs/libext2fs&lt;/b&gt; (GPLv2/LGPLv2)&lt;br/&gt;
+        • &lt;b&gt;exfat-utils&lt;/b&gt; (GPLv2)&lt;br/&gt;
+        • &lt;b&gt;f2fs-tools&lt;/b&gt; (GPLv2)&lt;br/&gt;
+        • &lt;b&gt;xfsprogs&lt;/b&gt; (GPLv2/LGPLv2.1)&lt;br/&gt;
+        • &lt;b&gt;udftools&lt;/b&gt; (GPLv2)&lt;br/&gt;
+        • &lt;b&gt;libusb&lt;/b&gt; (LGPLv2.1)&lt;br/&gt;
+    </string>
+    <string name="btn_close">Close</string>
+    <string name="btn_share_logs">Share Logs (Debug)</string>
+    <string name="logs_share_title">Send Logs to Author</string>
+    <string name="logs_error_capture">Error capturing logs.</string>
+
+    <string-array name="partition_types">
+        <item>None (Super Floppy)</item>
+        <item>MBR (Standard)</item>
+        <item>GPT (Modern)</item>
+    </string-array>
+</resources>

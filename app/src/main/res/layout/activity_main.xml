@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#121212"
+    android:fitsSystemWindows="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/btnShareLogs"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_share"
+                app:tint="#FFFFFF"
+                android:contentDescription="Share Logs"
+                android:layout_marginEnd="8dp"/>
+
+            <ImageButton
+                android:id="@+id/btnAbout"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_info_details"
+                app:tint="#FFFFFF"
+                android:contentDescription="About"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnLang"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_lang"
+                android:textColor="#00E5FF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:background="?attr/selectableItemBackground"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/textStatus"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:text="@string/status_waiting"
+            android:textSize="16sp"
+            android:textColor="#E0E0E0"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:padding="10dp"
+            android:scrollbars="vertical"
+            android:background="@drawable/bg_status_rounded"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_file_system"
+            android:textColor="#B0BEC5"
+            android:layout_marginBottom="5dp"/>
+        <Spinner
+            android:id="@+id/spinnerFs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:backgroundTint="#B0BEC5"
+            android:entries="@array/fs_types"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_cluster_size"
+            android:textColor="#B0BEC5"
+            android:layout_marginBottom="5dp"/>
+        <Spinner
+            android:id="@+id/spinnerCluster"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:backgroundTint="#B0BEC5"
+            android:entries="@array/cluster_sizes"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_partition_table"
+            android:textColor="#B0BEC5"
+            android:layout_marginBottom="5dp"/>
+        <Spinner
+            android:id="@+id/spinnerPartition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:backgroundTint="#B0BEC5"
+            android:entries="@array/partition_types"/>
+
+        <Button
+            android:id="@+id/btnFormat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_format"
+            android:textSize="18sp"
+            android:enabled="false"
+            android:backgroundTint="@color/btn_format_background"
+            android:textColor="@color/btn_format_text"
+            android:layout_marginBottom="20dp"/>
+
+        <Button
+            android:id="@+id/btnSendErrorLogs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_share_logs"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:backgroundTint="#44FFFFFF"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="20dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            app:icon="@android:drawable/ic_menu_send"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+        <RelativeLayout
+            android:id="@+id/layoutProgress"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:max="100"
+                android:progress="0"
+                android:indeterminate="false"
+                android:progressDrawable="@drawable/custom_progress_determinate" />
+
+            <ImageView
+                android:id="@+id/imgStick"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_usb_stick"
+                app:tint="#00E5FF"
+                android:contentDescription="Formatare Stick" />
+
+            <TextView
+                android:id="@+id/textPercentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="10dp"
+                android:text="0%"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#00E5FF"
+                android:visibility="visible"/>
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>

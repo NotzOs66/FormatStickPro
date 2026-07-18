@@ -1,0 +1,3274 @@
+2021-01-04 17:12:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Release version 2.3
+
+2021-01-04 17:10:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Update copyrights to reflect changes
+
+2021-01-03 13:01:01 +0100  Thomas Schmitt <scdbackup@gmx.net>
+
+	* doc: Mention in man cdrwtool the workaround for MODE SELECT failure on CD-RW
+
+	  Issue 33 shows that 3 of 5 tested drives fail on
+	    cdrwtool -d /dev/sr0 -q
+	  with
+	    Command failed: 55 10 00 00 00 00 00 00 3c 00 00 00 - sense 05.26.00
+	  if the loaded CD-RW is not closed. It is not clear from the MMC specs why
+	  this should be allowed to happen.
+	  So for now document the problem and the workaround in the man page of
+	  cdrwtool.
+
+	  Signed-off-by: Thomas Schmitt <scdbackup@gmx.net>
+
+2021-01-02 22:43:10 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Throw error when block-count is zero
+
+2021-01-02 22:07:04 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Update error message in pktcdvd-check when disc does not have erasable bit set
+
+2021-01-02 21:56:51 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Fix initializing buffers in pktcdvd-check
+
+2021-01-02 19:02:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Open device only once
+
+	  Trying to open device second time with O_EXCL may fail for pktcdvd devices.
+	  Rather always open with O_EXCL and then fallback without O_EXCL.
+
+2021-01-02 18:55:36 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Remove hack with procfs and O_EXCL
+
+2021-01-02 18:54:24 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove hack with procfs and O_EXCL
+
+	  It does not work for pktcdvd devices and completely disallow opening them.
+
+	  Rather always pass O_EXCL flags, for ordinary files it should be ignored.
+
+2020-12-30 00:17:52 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Show error message when invalid/unsupported udf revision is specified
+
+2020-12-29 18:11:47 +0100  Thomas Schmitt <scdbackup@gmx.net>
+
+	* cdrwtool: Switch to FORMAT UNIT Format Code 1
+
+	  The specs from MMC-1 to MMC-3 prescribe for FORMAT UNIT on CD-RW media the
+	  Format Code 7 and the related format descriptor layout. Beginning with
+	  MMC-4 this code and layout have been moved to Legacy Specifications.
+	  Pioneer BD-RW BDR-S09 rev 1.51 refuses on this code but works with the
+	  more modern Format Code 1 with Format Type 10h "CD-RW/DVD-RW Full Format".
+
+	  So introduce a new function format_disc_code1() and rename the old
+	  function format_disc() to format_disc_code7(). Create a new format_disc()
+	  which first tries format_disc_code1() and in case of failure tries
+	  format_disc_code7().
+
+	  Signed-off-by: Thomas Schmitt <scdbackup@gmx.net>
+
+2020-12-29 18:09:42 +0100  Thomas Schmitt <scdbackup@gmx.net>
+
+	* cdrwtool: Revive USE_IMMED
+
+	  Some drives get stuck when a FORMAT UNIT without Immed bit command lasts
+	  about 500 seconds. Other drives behave as if the Immed bit was set even if
+	  it is not set.
+	  The current code for waiting after starting an asynchronous SCSI command
+	  is only active if USE_IMMED is 1. It wrongly expects wait_cmd() to fill
+	  its submitted sense data buffer and it determines the end of the
+	  asynchronous command from the unreliable progress messages of the drive.
+
+	  So replace functions print_completion_info() and sig_progress() by a new
+	  function wait_for_unit_ready() and enable USE_IMMED.
+
+	  Signed-off-by: Thomas Schmitt <scdbackup@gmx.net>
+
+2020-12-20 23:59:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix handling Non-removable and Removable Re-writable disk
+
+	  These medias are random writable and therefore MEDIA_TYPE_HD is the best
+	  match for random access write support.
+
+2020-12-20 15:49:15 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix check for return value of CDROM_SEND_PACKET ioctl
+
+2020-12-19 12:32:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Improved check of optical device in pktcdvd-check
+
+	  Use CDROM_GET_CAPABILITY for detection of optical device. This filter out
+	  pktcdvd devices (which do not support this ioctl) and therefore prevent
+	  creating recursive pktcdvd mapping. Also check for CDC_GENERIC_PACKET
+	  capability to know if CDROM_SEND_PACKET ioctl is supported. Filter out also
+	  WORM SCSI devices which are handled by kernel's SCSI cdrom sr driver but do
+	  not support MMC command set.
+
+2020-12-16 22:40:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Add a new tool pktcdvd-check which checks if optical device can be used by pktcdvd
+
+	  This tool is using same tests as kernel pktcdvd.ko driver for checking if
+	  optical device can be used for write operations via packet writing.
+
+	  Use this tool in udev rules and create pktcdvd mapping only if optical
+	  device can be really used by pktcdvd.ko in read-write mode.
+
+2020-12-16 22:40:24 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Ensure that stdin, stdout and stderr are valid
+
+2020-12-06 22:01:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Update udev rule to setup packet device only for CD-RW, DVD+RW, DVD-RW and DVD-RAM
+
+	  Only these optical disc types have supported write operation by kernel
+	  pktcdvd.ko driver. So it does not make sense to setup packet device mapping
+	  for other optical discs for now. Also use new option -i to prevent asking
+	  kernel to create mapping when it already exists and remove when it does not
+	  exist. So less error messages in dmesg.
+
+2020-12-06 21:59:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: For tear down add option -i to ignore error when device is already unmapped
+
+2020-12-06 14:09:25 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Allow to specify MBR sector size via option --bootarea=mbr:sec-size
+
+	  This is required when generating UDF image for Native 4K hard disk which
+	  has 4096 bytes long sectors and therefore also all values calculated in MBR
+	  are in 4096 bytes units.
+
+	  Usage: mkudffs --media-type=hd --bootarea=mbr:4096 image.udf
+
+2020-12-06 14:06:16 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Option --startblock cannot be used together with option --bootarea=mbr
+
+2020-12-06 14:04:33 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix possible uint32_t multiplication overflow
+
+2020-11-22 16:11:43 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new options for specifying owner, organization and contact information
+
+	  They are stored in LVInfo1, LVInfo2 and LVInfo3 fields. Prior this change
+	  mkudffs incorrectly set these fields to udftools contact information
+	  instead of information of the media owner and has not provided options to
+	  change them. After this change default values for LVInfo1 (owner name),
+	  LVInfo2 (organization name) and LVInfo3 (contact information) are empty and
+	  user who create new UDF filesystem can specify them correctly.
+
+2020-11-22 16:10:48 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Add new options for changing owner, organization, contact, appid and impid identifiers
+
+2020-11-22 16:09:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Show new information: owner, organization, contact, appid and impid
+
+2020-11-21 00:52:59 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add support for specifying minimal size of image with VAT
+
+	  In some situations there are requirements for minimal image size. So add
+	  new option --minblocks to specify minimal size of UDF disc with VAT.
+	  Also convert FLAG_MIN_300_BLOCKS to use this new option.
+
+2020-11-20 17:34:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add support for creating Multisession UDF disc images
+
+	  There is a new command line option --startblock to specify location where
+	  the new session and therefore whole UDF filesystem would start.
+
+2020-11-19 23:49:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use ICBTAG_STRATEGY_TYPE_4 and ICBTAG_STRATEGY_TYPE_4096 instead of hardcoded numeric constants
+
+2020-11-19 23:48:00 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use PD_PARTITION_FLAGS_ALLOC instead of hardcoded numeric constant
+
+2020-11-14 12:06:13 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Set PVD Interchange Level to 2
+
+	  According to UDF specification, if volume is not part of multi-volume
+	  Volume Set then PVD Interchange Level shall be set to 2.
+
+	  As mkudffs does not support multi-volume Volume Set, set PVD Interchange
+	  Level to 2. Maximum Interchange Level stay 3 to allow upgrading it for
+	  multi-volume Volume Set inclusion.
+
+2020-11-11 00:11:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Set volDescSeqNum of all descriptors to order in which they are written to disc
+
+2020-11-11 00:10:07 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use sizeof() instead of hardcoded constant in default_vat20 lengthHeader
+
+2020-11-11 00:09:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove reserved data from Application Identifier Suffix area
+
+2020-11-11 00:08:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove unused default_vdp
+
+2020-11-11 00:07:31 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Explicitly set packet len to 32
+
+	  Default value is 32 but rather set it explicitly.
+
+2020-11-11 00:07:22 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Change Application Identifier from default mkudffs string to cdrwtool string with version
+
+	  This change allows to identify which media were formatted by mkudffs and
+	  which by cdrwtool.
+
+2020-11-11 00:07:05 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Move UDF_ID_DEVELOPER from osta_udf.h to mkudffs.h
+
+	  UDF_ID_DEVELOPER macro contains Linux identifier use in UDF Implementation
+	  Identifier. It is not OSTA UDF specific but rather Linux / mkudffs specific
+	  and therefore move it out from osta_udf.h include file.
+
+2020-11-11 00:03:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add udftools version into Application Identifier
+
+	  UDF_ID_APPLICATION is used for UDF Application Identifier.
+	  Therefore include into it also mkudffs version.
+
+2020-11-11 00:02:21 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Cleanup usage of CS0 charspec related macros
+
+	  No functional change.
+
+2020-11-10 00:56:31 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix parsing mmc profile from GPCMD_GET_CONFIGURATION and GPCMD_READ_DISC_INFO
+
+	  Use struct feature_header and disc_information and query size of the
+	  disc_information prior reading its structure. And fix also mmc profiles.
+
+2020-11-10 00:50:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix alignment for CD-R discs
+
+	  There is no requirement that structures of CD-R discs needs to be aligned
+	  to 64kB (32 sectors). This applies only for CD-RW disc. So after changing
+	  alignment of CD-R discs, its sizing structure is same as for CD-ROM and
+	  therefore merge them together.
+
+2020-11-09 17:39:36 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix --packetlen option
+
+	  Its value was ignored and always default sizing was used. Now default
+	  packetlen is read from default_sizing (align member).
+
+2020-11-08 18:28:13 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix aligning VAT block also for closed media
+
+2020-11-08 17:54:10 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix generating unclosed CD-R image with blocks more than 3072
+
+	  Unclosed VAT media must not contain second anchor point.
+
+2020-11-08 17:34:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix erasing remaining OS boot area when filling MBR table
+
+2020-11-08 13:02:12 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix aligning VAT block
+
+2020-11-07 20:42:10 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Check that charset is really OSTA UDF and when updating set it to OSTA UDF
+
+2020-11-07 20:41:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Check for descriptors charsets are really UDF
+
+2020-11-07 20:38:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Show warning when AVDPs contain different location of MVDS
+
+	  In most cases it means that supplied image is Multisession and --startblock
+	  was not specified correctly.
+
+2020-11-07 20:37:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Update error message about wrong VAT
+
+2020-11-07 20:29:18 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Allow to read discs with Virtual Partition when VAT was not detected
+
+2020-11-07 12:46:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo, udflabel: Allow to specify end of selected session on Multisession UDF optical discs
+
+	  There is a new command line option --lastblock for specifying end of the
+	  selected session.
+
+2020-11-06 17:22:52 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix reporting number of VRS blocks on Multisession UDF disc
+
+2020-11-04 22:38:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo, udflabel: Calculate VAT block position according to chosen udf block size
+
+2020-10-27 20:55:58 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo, udflabel: Add support for Multisession UDF optical discs
+
+	  Correctly autodetect offset of the last session of Multisession UDF optical
+	  disc via CDROMMULTISESSION ioctl. To access other previous session there is
+	  a new command line option --startblock.
+
+2020-10-26 12:16:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix VSD abbrev
+
+2020-10-24 12:51:29 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Style fixes for udfinfo manpage
+
+2020-10-24 01:53:33 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix buffer overflow in decode_locale() function
+
+2020-03-21 12:44:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix filling CHS sector number into MBR partition table
+
+	  CHS sector numbers are 1-based.
+
+2020-03-04 18:45:20 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix compile warning: ‘clen’ may be used uninitialized in this function
+
+2020-03-04 17:57:07 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Simplify decode_locale() function
+
+	  Use wcrtomb() also for encoding replacement character.
+
+2020-03-04 17:55:13 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Simplify decode_locale() function
+
+	  Use loop also for encoding wide null character to byte sequence, instead of using additional wcrtomb() call.
+
+2020-03-04 17:50:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix handling of errors from wcrtomb() function
+
+	  wcrtomb(cbuf, L'\0', &ps) call returns length including null byte.
+
+2020-02-17 17:38:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Show error when setlocale() fails
+
+2020-02-17 17:37:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix usage of wcrtomb() function
+
+	  Call wcrtomb(cbuf, L'\0', &ps) at the end of conversion if &ps is not in initial state.
+
+2020-01-18 01:25:23 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Updating pseudo-overwrite partition is not supported yet
+
+2020-01-18 01:16:21 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Use ICBTAG_FILE_TYPE_VAT15 for VAT context in 1.50 revision
+
+	  Both macros ICBTAG_FILE_TYPE_UNDEF and ICBTAG_FILE_TYPE_VAT15 have value 0.
+	  So in VAT context use ICBTAG_FILE_TYPE_VAT15 as it better describe purpose.
+
+2020-01-12 23:27:20 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use common DVD-RW configuration also for DVD-RW DL and DVD+RW DL discs
+
+2020-01-12 23:23:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: For UDF 1.50 and 2.00 set Packet Length for Sparable Partition to fixed value 32
+
+	  This is requirement by UDF 1.50 and 2.00 specification to ensure
+	  compatibility with existing UDF implementations.
+
+	  Manually specified option --packetlen= can still overwrite this default
+	  fixed value 32.
+
+2020-01-12 22:56:49 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Always do checks for configured udf revision and udf features
+
+2020-01-12 22:17:16 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* ecma_167.h: Fix ENTITYID_FLAGS_* definitions to be really flags
+
+2019-12-30 20:07:41 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* osta_udf.h: Fix typo in macro names
+
+2019-12-28 16:02:16 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Release version 2.2
+
+2019-12-28 16:02:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Update copyrights to reflect changes
+
+2019-12-28 13:43:21 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix default time fallback
+
+2019-12-26 11:09:30 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix write_nointr() function
+
+2019-12-16 17:24:41 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Update documentation about encoding
+
+2019-12-15 15:12:00 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix warning: dereferencing type-punned pointer will break strict-aliasing rules
+
+2019-12-15 15:10:52 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Calculate allocated AVDP data offset explicitly
+
+2019-12-15 15:07:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Mark all packed structures as they may alias
+
+	  This should prevent breaking strict aliasing rules.
+
+2019-12-13 17:58:25 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Show softwriteprotect and hardwriteprotect flags
+
+2019-12-13 17:57:05 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Respect SoftWriteProtect and HardWriteProtected flags
+
+	  They can be overridden by --force option.
+
+2019-12-13 17:56:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Option --read-only set also SoftWriteProtect domain flag
+
+2019-12-13 17:54:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Set initial UDF revision via udf_set_version() function
+
+2019-12-13 17:54:08 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fill UDF revision only on once place in udf_set_version() function
+
+2019-12-13 17:53:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use domainIdentSuffix and UDFIdentSuffix structures
+
+2019-12-13 17:51:23 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Parse UDF revision also from IUVD, FSD, STABLE, VAT descriptors and Partition Maps
+
+	  udfwriterev is set to maximum value of all parsed UDF revisions. udfrev is
+	  set to Minimum UDF Read Revision value from LVID with fallback value from
+	  udfwriterev.
+
+2019-12-12 17:33:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* ecma_167.h: Fix Extent Length defines
+
+2019-12-12 17:33:21 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* osta_udf.h: Update header file to UDF 2.60 revision
+
+2019-12-11 21:50:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: At the end of format call fsync() and close() functions
+
+2019-12-11 21:50:16 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: At the end of update call fsync() and close() functions
+
+	  close() always closes file descriptor, but it may return error when writing
+	  to device failed.
+
+2019-12-11 21:47:08 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Handle interrupted read/write syscalls
+
+	  Use new wrapper functions read_nointr/write_nointr which restart read/write
+	  syscalls when are interrupted by signals.
+
+2019-12-09 00:00:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Postpone allocation of VAT from udf_init_disc() function
+
+	  At time when udf_init_disc() is called it is not know final device blocksize.
+
+2019-12-08 23:59:22 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix endianity in fill_mbr() function
+
+2019-12-08 20:12:11 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add check that Virtual Allocation Table does not overflow
+
+2019-12-08 17:34:41 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: If there are too many Sparing Tables, read maximally 4
+
+2019-12-08 14:50:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix udf_alloc_bitmap_blocks to not access invalid memory
+
+	  Same problem as described in adbb5fc47440da200c8ca2601928179a64ed53cc
+	  happen again when size is less then 32 (4 bytes) and offset is nonzero.
+
+2019-12-08 13:49:17 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix option --noefe when specified before --media-type or --udfrev
+
+2019-12-08 13:43:38 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove useless clearing of FLAG_VAT
+
+	  Now there is check that --vat is not used for older UDF revisions.
+
+2019-12-07 15:26:31 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Update documentation
+
+2019-12-07 15:25:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Fix specifying default timeout for CDROM_SEND_PACKET commands
+
+2019-12-07 15:12:46 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Autodetect media type
+
+2019-12-07 01:32:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove duplicate check for UDF revision 1.50 and Sparing Table
+
+2019-08-01 09:40:48 -0500  Steven J. Magnani <steve@digidescorp.com>
+
+	* mkudffs: adjust partition size to work around chkdsk bug
+
+	  Windows chkdsk has a bug in its Unallocated Space bitmap analysis.
+	  If the last block of a UDF partition falls in the middle of a bitmap byte,
+	  chkdsk reports spurious errors if the bits in that byte that _don't_
+	  correspond to UDF partition blocks are zero.
+
+	  To improve interoperability, when formatting includes an
+	  unallocated space bitmap, make sure the created UDF partition
+	  is a multiple of 8 blocks.
+
+2019-12-04 19:53:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix formatting uuid
+
+2019-12-04 19:19:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: In read-only mode throw warning when device is busy
+
+2019-12-04 19:18:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: In read-only mode throw warning when device is busy
+
+2019-12-04 19:15:49 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Simplify check for mounted device
+
+2019-12-04 19:15:15 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Simplify check for mounted device
+
+2019-11-02 12:34:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Update documentation for udfinfo and udflabel
+
+2019-11-02 12:06:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Add support for reading Metadata Partition Map and Metadata File
+
+	  This implements reading of all udfinfo's attributes from UDF 2.50 and UDF
+2.60 revisions. So also udflabel is able to read and change its all
+	  identifier options on UDF 2.50 and UDF 2.50 disks.
+
+2019-11-02 11:58:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Use function find_partition() instead of get_partition()
+
+	  Function find_partition() can also find partition specified by partition
+	  map number. So get_partition() is not needed anymore.
+
+2019-11-02 11:41:13 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix calculating free space blocks when more Partition Maps or Partition Descriptors are present
+
+	  This fixes calculation of free space blocks when Type 1 Partition Map or
+	  Sparable Partition Map together with Metadata Partition Map are stored in
+	  Logical Volume Descriptor which is common scenario for UDF 2.50 and UDF
+2.60 disks.
+
+	  When doing free space calculation we should look only at Physical
+	  partitions and Sparable partitions as other types (Virtual or Metadata) are
+	  stored as another layer on existing physical/sparable partitions.
+
+	  UDF uses term "partition number" for two different things: One is Partition
+	  Descriptor and second one is Partition Map (stored in Logical Volume
+	  Descriptor). Which is a bit misleading as more Partition Maps are mapped to
+	  same Partition Descriptor.
+
+	  To unambiguously describe partition number, function find_partition() was
+	  extended to take also number from Partition Descriptor and number from
+	  Partition Map.
+
+	  Calculation of free space blocks was also extended to scan both Partition
+	  Descriptors (when second is present too).
+
+2019-10-26 12:44:32 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix check for calloc failure
+
+2019-10-08 22:12:32 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Correctly indicate error in get_write_mode() and set_write_mode()
+
+2019-10-08 22:11:19 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Check for malloc/calloc/realloc errors
+
+2019-09-30 18:11:16 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix memory leak in encode_locale() function
+
+2019-08-27 18:19:05 +0200  Fabrice Fontaine <fontaine.fabrice@gmail.com>
+
+	* configure.ac: detect readline via pkg-config when possible
+
+	  pkg-config automatically handles static linking situations, where for
+	  example readline is linked against ncurses, and therefore -lncurses
+	  needs to be passed in addition to -lreadline.
+
+	  This proposal uses pkg-config when available. If pkg-config is not
+	  found, or readline is not found via pkg-config, we fallback to the
+	  existing AC_CHECK_LIB(). This AC_CHECK_LIB() test is modified to set
+	  READLINE_LIBS, like PKG_CHECK_MODULES() does. The Makefile.am
+	  consequently uses READLINE_LIBS instead of hardcoding -lreadline.
+
+	  Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+	  [Retrieved (and slightly updated) from:
+	  https://git.buildroot.net/buildroot/tree/package/udftools/0002-configure.ac-detect-readline-via-pkg-config-when-pos.patch]
+	  Signed-off-by: Fabrice Fontaine <fontaine.fabrice@gmail.com>
+
+2019-08-22 10:49:44 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Fix clang-7
+
+2019-08-22 10:19:45 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Update config for new Travis dists
+
+2019-08-13 00:50:27 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* Makefile: Use $(MKDIR_P) and $(RM) variables
+
+2019-08-13 00:49:17 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Allow to build udftools without udev
+
+	  If udev is not found during configure phase then do not install pktsetup
+	  udev rules file. udev itself is not used for anything else.
+
+	  Fixes: https://github.com/pali/udftools/issues/30
+
+2019-07-11 21:31:54 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new option --read-only which sets UDF Access Type to Read-Only
+
+2019-06-27 13:08:45 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Use compile time constant MB_LEN_MAX instead of runtime MB_CUR_MAX
+
+	  MB_CUR_MAX is in the range [1, MB_LEN_MAX].
+
+	  This change remove needs for dynamic allocated arrays on stack.
+
+2019-06-26 20:13:38 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Add support for UTF-16 surrogate pairs in 16-bit OSTA Compressed Unicode format
+
+	  This allows to store and also read OSTA dstrings with Unicode code points
+	  above U+FFFF in all udftools programs.
+
+	  It is not clear from OSTA UDF specification whether 16-bit OSTA Compressed
+	  Unicode format should be treated as UCS-2 or UTF-16.
+
+	  In UCS-2 are allowed unpaired surrogate code units but they and even paired
+	  surrogate pairs do not have special any meaning. In UTF-16 are unpaired
+	  surrogate code units disallowed and one surrogate pair (two code units)
+	  represent just one Unicode code point.
+
+	  So in udftools use compromise. Treat 16-bit OSTA Compressed Unicode as
+	  UCS-2 with exception that well-formed UTF-16 surrogate pair (two UTF-16
+	  code units) represents just one Unicode code point, like in UTF-16. Similar
+	  solution is used for file names on Microsoft Windows systems.
+
+2019-06-26 20:07:36 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Remove parsing 5 byte and 6 byte long UTF-8 sequences
+
+	  Those are invalid UTF-8 sequences.
+
+2019-06-26 17:43:00 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* Makefile: Use $(LN_S) and $(RM) variables
+
+2019-06-26 17:41:54 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Use AS_IF macro for C99 check
+
+2019-03-24 11:53:10 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Fix spelling
+
+2019-02-24 17:43:22 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Enable Ubuntu Xenial
+
+2019-02-24 17:41:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Change type of year in timestamp from int16_t to uint16_t
+
+	  According to ECMA-167 standard, year is represented as signed number in
+	  two-complement form from 1 to 9999. To prevent problems with endianity and
+	  signedness use rather unsigned type as negative years are not allowed.
+
+2019-02-24 17:05:23 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Disable pedantic errors for gcc 4.8
+
+2019-02-24 16:52:32 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Do not use -pedantic for gcc versions << 4.8
+
+2019-02-24 16:10:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Print config.log after failure
+
+2019-02-24 15:24:52 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Do not treat pedantic warnings as errors
+
+2019-02-24 12:06:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Enable pedantic C99 warnings
+
+2019-02-24 12:06:46 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Replace glibc's specific printf %m modifier
+
+	  Use standard printf modifier %s with strerror() argument.
+
+2019-02-24 12:06:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Remove extra semicolon
+
+2019-02-24 12:03:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Do not use structure with flexible array in another structure with spacer
+
+2019-02-24 12:01:10 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Use C99 flexible arrays instead of gcc extension zero-length arrays
+
+2019-02-24 11:46:33 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Do not use void* pointer in arithmetic
+
+2019-02-24 11:46:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Do not use void* pointer in arithmetic
+
+2019-02-24 11:45:41 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Do not use void* pointer in arithmetic
+
+2019-02-06 00:22:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Use C99 inttypes.h
+
+2019-02-06 00:22:31 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Use C99 inttypes.h
+
+2019-02-06 00:22:18 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use C99 inttypes.h
+
+2018-12-28 12:13:16 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Release version 2.1
+
+2018-12-28 11:54:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Remove AC_HEADER_TIME and AC_STRUCT_TM macros
+
+	  Nobody checks for TIME_WITH_SYS_TIME or TM_IN_SYS_TIME definitions,
+	  therefore they are not needed.
+
+2018-12-28 11:45:43 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Remove checking for POSIX headers
+
+	  Nobody checks for HAVE_* definitions, therefore it is not needed to check
+	  for them.
+
+2018-12-28 11:44:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Remove AC_HEADER_STDC macro
+
+	  Nobody checks return value of this macro, nor definition of STDC_HEADERS.
+	  Therefore is not needed.
+
+2018-12-21 19:51:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Remove check for include file string.h
+
+	  It is not needed as there is already check for C99.
+
+2018-12-17 15:33:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Remove old non-working Ben's email address
+
+2018-12-17 15:33:33 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Update copyrights to reflect changes
+
+2018-12-16 10:15:24 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Remove unused include file udf_endian.h and fix other sources
+
+2018-12-16 09:49:20 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix spelling
+
+2018-12-14 12:44:26 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Add gcc-8, clang-6.0 and clang-7
+
+2018-12-14 11:26:49 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix checking if ICB for VAT is valid
+
+2018-12-10 19:34:08 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Add some workaround for Year 2038 Bug
+
+	  Check return values of time(), localtime() and gettimeofday() functions
+	  which may fail.
+
+	  Fallback to date/time 1.1.1980 00:00:00 when those functions fail.
+
+2018-12-10 19:21:18 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Add randu32() function
+
+	  It replaces semi-broken get_random_bytes() functions in mkudffs and
+	  udflabel. Function rand() returns number from interval [0, RAND_MAX] where
+	  RAND_MAX is in most case 2^31-1, so rand() returns only 31 random bits.
+
+2018-12-09 13:39:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Fix generating new random uuid
+
+2018-12-06 19:15:48 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Fix constant width-font
+
+2018-11-16 18:40:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Fix style
+
+2018-11-06 22:10:09 +0800  Roy Zhang <pudh4418@gmail.com>
+
+	* mkudffs: Fix minor typo
+
+2018-11-04 13:50:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Update manpages
+
+2018-10-20 23:23:44 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix parsing LVIDIU on UDF 1.01 disks
+
+2018-10-20 23:22:32 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add support for UDF revision 1.01
+
+	  Finally I got official specification UDF_101.PDF and therefore I modified
+	  mkudffs to support UDF 1.01.
+
+2018-10-16 22:19:11 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Fix strtou32
+
+	  Instead of sscanf() for detecting whitespaces, use isspace().
+
+2018-10-15 23:38:31 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix prototype for udf_set_version() function
+
+	  UDF revision is 16bit integer.
+
+2018-10-15 22:35:14 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Fix converting strings to integers
+
+	  Stop using strtou* functions as they are broken by design. They do not
+	  signal overflow so are fully unusable for untrusted input.
+
+	  Instead use strtoll() which returns signed value, but signals correctly
+	  underflow. This function ignores and skips leading whitespaces, so detect
+	  them via sscanf() space and %n format.
+
+	  Implement new strtou32() and strtou16() functions in libudffs and use them
+	  in all tools.
+
+2018-10-15 22:01:41 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Disallow specifying unsupported UDF revisions
+
+	  First UDF revision which supports CD-RW discs is 1.50. And udftools does
+	  not support 2.50 or 2.60 on CD-RW discs yet.
+
+2018-10-15 22:00:01 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Include proper file for udf_set_version() function prototype
+
+2018-09-17 11:53:29 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Remove obsolete debug output
+
+2018-09-04 23:36:15 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix crashing when parsing incomplete disk image
+
+2018-08-12 14:53:18 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix compile warning comparison between signed and unsigned integer expressions
+
+2018-08-12 13:52:56 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Fix offset overflow on 32bit systems
+
+	  Use off_t type instead of size_t which is only 32bit on 32bit systems.
+
+2018-08-12 13:52:34 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix offset overflow on 32bit systems
+
+	  Use off_t type instead of size_t which is only 32bit on 32bit systems.
+
+2018-08-12 13:51:42 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix overflow in multiplication
+
+	  Because size_t is 32bit on 32bit systems.
+
+2018-08-12 13:49:52 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Make fallback function for random bytes more resource effective
+
+2018-08-12 13:49:30 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix fallback function for random bytes
+
+2018-07-21 23:04:48 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix alignment of VAT again
+
+2018-07-21 10:42:11 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix alignment of VAT, put it always to the last sector at the end of packet
+
+2018-07-21 10:41:08 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: DVD and BD discs do not require minimal size of 300 sectors
+
+2018-07-21 10:38:34 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Allow to set alignment of UDF structures via --packetlen option for any media type
+
+2018-07-21 10:34:43 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Fix formatting
+
+2018-06-30 12:16:41 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Fix formatting
+
+2018-06-02 14:30:51 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Use \(en for en-dash
+
+2018-06-02 14:30:44 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Update documentation about VAT for udfinfo and udflabel
+
+2018-06-02 14:30:23 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix reading FSD on discs with VAT or Sparable partitions
+
+	  Tag location must match original block number and not translated.
+
+2018-06-02 14:02:32 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Add another check for VAT length overflow
+
+2018-06-02 13:37:14 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix possible integer overflow
+
+2018-06-02 13:04:21 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix checks for VAT length
+
+2018-06-02 12:13:53 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Implement reading VAT outside of outside of ICB
+
+2018-05-27 12:47:36 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix locating blocks in spartable when packet length is not power of two
+
+2018-05-27 02:04:06 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Remove misleading error check and message about writeonce partition << 2.00
+
+	  Updating writeonce partition of UDF revision prior to 2.00 is possible via
+	  Logical Volume Extended Information when Virtual Allocation Table is used.
+	  But udflabel does not support updating VAT yet and this is covered by
+	  another error check.
+
+2018-05-26 16:15:34 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix recalculation of lengthExtendedAttr
+
+2018-05-26 16:14:51 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix compile warning: 'location' may be used uninitialized in this function
+
+2018-05-26 15:47:45 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Implement generating UDF 1.50 Logical Volume Extended Information
+
+	  It is Extended Attribute for UDF 1.50 disc with VAT and contains up-to-date
+	  information about number of files, directories and last update of Logical
+	  Volume Identifier.
+
+2018-05-26 15:47:27 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Implement function insert_ea() for inserting extended attributes into file entries
+
+2018-05-26 14:15:21 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix generating VAT on big endian systems
+
+2018-05-26 14:13:53 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix reading VAT on big endian systems
+
+2018-05-26 13:38:05 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Implement reading of UDF 1.50 Logical Volume Extended Information
+
+	  For UDF 1.50 discs with VAT (defined in UDF 1.50 Errata, DCN 5003,
+	  3.3.4.5.1.3) it contains up-to-date information about number of files,
+	  directories and last update of Logical Volume Identifier. Like in UDF 2.00.
+
+2018-05-25 08:29:10 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix reading and processing PD descriptors
+
+	  UDF standard allows to have up to two PD descriptors. Process them both and
+	  when other functions needs to access PD descriptor choose correct one based
+	  on partition number.
+
+2018-05-25 08:28:12 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix reading VDP descriptor
+
+	  VDP is also terminator of the current extent.
+
+2018-05-24 17:54:59 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Check for alloc errors
+
+2018-05-24 17:54:52 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Check for alloc errors
+
+2018-05-24 17:54:43 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Fix error message, there is only one FSD
+
+2018-05-18 17:02:44 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Set minimal version of autoconf to 2.64
+
+	  This version is required for PACKAGE_URL (5th param for AC_INIT) and for
+	  blank arguments in AC_CHECK_LIB.
+
+	  Fixes: https://github.com/pali/udftools/issues/19
+
+2018-04-23 16:03:19 +0200  Pierre-Yves <pyu@riseup.net>
+
+	* pktsetup: Ask udev for correct directory instead of trying to guess it
+
+	  Signed-off-by: Pierre-Yves <pyu@riseup.net>
+
+2018-04-22 15:05:46 +0200  Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+
+	* pktsetup/pktsetup.c: do not include <bits/types.h>
+
+	  This header is not a standard header, and is for example not provided
+	  by the musl C library.
+
+	  This change has been tested by building udftools against glibc, uClibc
+	  and musl.
+
+	  Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+
+2018-04-19 17:27:25 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Fix hyphens, minuses, en dashes and spaces
+
+2018-02-26 12:47:36 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Do not run Coverity Scan jobs on non-master branches and in pull requests
+
+2018-01-21 13:27:46 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Do not try to update RVDS if points to same location as MVDS
+
+2018-01-21 13:27:23 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Correctly read filesytem which MVDS and RVDS points to same location
+
+2018-01-21 13:20:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: For very small filesystems, reduct size of descriptors
+
+	  UDF filesystems with less then 258 blocks are not strictly valid, therefore
+	  there is no need for trying to achieve full compatibility with standards.
+
+	  When less then 258 blocks is used, reduce overhead of UDF filesystem by not
+	  storing RVDS and decrease size of MVDS and LVID bare minimum (6+1 blocks).
+
+2018-01-21 13:18:08 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Always setup Terminating Descriptor
+
+	  Linux UDF kernel driver is not able to read UDF filesystem without
+	  Terminating Descriptor. So rather disallow creating filesystem without it.
+
+2018-01-21 13:14:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix function udf_alloc_bitmap_blocks
+
+	  Function rejected to allocate last bit in bitmap due to more restricted
+	  check. Relax it.
+
+2018-01-21 13:11:48 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix function udf_find_next_one_bit
+
+	  Make sure that function does not return bigger value then size argument.
+	  Set remaining bit at size position to 1, so bigger value would not be
+	  returned.
+
+2018-01-21 02:48:13 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Warn when creating UDF filesystem with less then 258 blocks
+
+	  According to ECMA-167 3/8.1.2.1, number of last block shall be greater then
+256. Therefore UDF filesystem shall have at least 258 blocks. So show
+	  warning that such filesystem can cause problems.
+
+2018-01-21 02:21:58 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Fix changing label on big endian systems
+
+	  Function compute_crc() must return crc value in system endianity.
+
+2018-01-14 15:35:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Enforce ISO C99
+
+	  Fix also CFLAGS for Travis.
+
+2018-01-13 14:51:18 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix reading lengthAllocDescs on big endian systems
+
+2018-01-13 14:48:16 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix infinite loop on big endian systems
+
+	  Member numOfBits is stored in little endian.
+
+2018-01-12 22:57:08 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Simplify detection of big endian systems
+
+	  Use autoconf AC_C_BIGENDIAN macro for it.
+
+2018-01-12 22:39:35 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Add also system versions of clang into matrix
+
+2018-01-12 22:37:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Set RUN variable with corresponding qemu binary
+
+2018-01-06 14:44:05 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Check return value of fgets
+
+2018-01-06 13:43:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix compilation without libreadline
+
+2018-01-06 13:23:51 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Compile also for x32
+
+2018-01-06 13:20:51 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Fix support for powerpc and arm
+
+2018-01-06 03:36:57 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Do not use binfmt as it does not work and export configure flags
+
+2018-01-06 03:07:05 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Compile also for powerpc and arm
+
+2018-01-06 02:54:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Allow to compile without libreadline
+
+2018-01-05 23:05:05 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Compile also without -O2
+
+2018-01-05 22:52:59 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Enable -Wno-error=unused-function only for clang
+
+2018-01-02 15:10:34 +0100  Lars Wendler <polynomial-c@gentoo.org>
+
+	* Include <sys/sysmacros.h> to prevent build breakage with >=glibc-2.25
+
+	  libtool: link: x86_64-pc-linux-gnu-gcc -march=native -mtune=native -O2
+	  -pipe -Wl,-O1 -Wl,--hash-style=gnu -Wl,--sort-common -Wl,--as-needed -o
+	  mkudffs main.o mkudffs.o defaults.o file.o options.o
+	  ../libudffs/.libs/libudffs.a
+	  main.o: In function `is_whole_disk':
+	  main.c:(.text+0x2ce): undefined reference to `major'
+	  main.c:(.text+0x2dd): undefined reference to `minor'
+	  main.o: In function `main':
+	  main.c:(.text.startup+0x72f): undefined reference to `minor'
+	  main.c:(.text.startup+0x741): undefined reference to `major'
+	  collect2: error: ld returned 1 exit status
+	  make[1]: *** [Makefile:378: mkudffs] Error 1
+
+2017-12-29 17:27:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Release version 2.0
+
+2017-12-29 17:10:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Call first fdatasync() only when write operation happened
+
+2017-12-28 22:46:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Remove unused headers from AC_CHECK_HEADERS
+
+2017-12-28 22:46:30 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Remove unneeded include malloc.h
+
+2017-12-28 22:46:10 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Update copyrights to reflect changes
+
+2017-12-28 22:24:54 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* AUTHORS: Update file to reflect changes
+
+2017-12-28 22:24:08 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Makefile: Remove automatically added file ChangeLog
+
+2017-12-28 21:38:26 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs: Update manpage to reflect all changes
+
+	  Add new section about compatibility and bugs.
+
+2017-12-28 21:38:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/udfinfo: Update manpage
+
+	  Remove also section UDF LABEL AND UUID as it is same as in udflabel.8 and
+	  add proper references.
+
+2017-12-28 21:37:43 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/udflabel: Update manpage
+
+2017-12-28 19:10:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Fix typo
+
+2017-12-28 19:03:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix blocksize detection of block devices
+
+2017-12-27 21:55:15 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Ensure that file descriptors 0, 1 and 2 are open
+
+2017-12-27 21:50:27 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Ensure that file descriptors 0, 1 and 2 are open
+
+2017-12-27 21:20:51 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Reject overwriting mounted devices
+
+	  When changing UDF label it is needed overwrite more blocks, including root
+	  directory. Changing UDF label on mounted filesystem can misbehave kernel
+	  UDF driver which can lead to data corruption.
+
+	  Use same reopen scheme via /proc as mkudffs to achieve race-free read-write
+	  mode with O_EXCL for block devices.
+
+2017-12-27 17:17:35 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Add new option -n/--no-write to just simulate
+
+2017-12-27 16:41:21 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new option -n/--no-write to just simulate
+
+2017-12-26 23:12:58 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new option --new-file which enforce creating a new image file
+
+2017-12-26 21:50:09 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Update help
+
+2017-12-26 21:48:09 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Cosmetic change
+
+2017-12-25 21:09:48 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Synchronize after updating VDS
+
+2017-12-25 20:29:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Correctly initialize disc size
+
+2017-12-25 19:56:24 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Try to read some blocks also above CDROM_LAST_WRITTEN
+
+	  Sometimes CDROM_LAST_WRITTEN returns less blocks as really written.
+
+2017-12-25 19:52:08 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: For CD/DVD/BD discs put VAT block to the end of track which must have at least 300 blocks
+
+2017-12-24 16:30:26 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Add udev rules file for automatic managing of packet writing devices
+
+2017-12-24 16:08:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Allow to remove mapping specified also by cd-rom major:minor device
+
+2017-12-24 15:12:54 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Set return value for pktsetup -s
+
+2017-12-24 14:46:30 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Allow to setup cd-rom device also by major:minor numbers
+
+2017-12-24 14:11:45 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix generating images with VAT and less then 770 blocks
+
+2017-12-21 11:32:14 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Throw fatal error message if invalid or incomplete UTF-8 sequence was specified
+
+	  There is no way to recover and mbstowcs() for UTF-8 encoding do same thing.
+
+2017-12-21 11:21:05 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Unify error messages
+
+2017-12-21 10:05:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Maximal supported UDF revision is 2.60
+
+2017-12-20 19:52:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udflabel: Add new tool udflabel which can show or change UDF label
+
+2017-12-19 00:21:12 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix error message
+
+2017-12-19 00:20:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix setting descriptor offsets
+
+2017-12-19 00:20:11 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Unify error messages
+
+2017-12-18 22:08:11 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix endianity for Partition Access Type
+
+2017-12-18 22:07:49 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Close file after we finish reading
+
+2017-12-18 18:32:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Rewrite pkt_device check to be more friendly for static code analysis
+
+2017-12-17 23:55:57 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Move RVDS, so there would be space also between RVDS and last AVDP
+
+2017-12-17 23:53:34 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix size calculation of Space Bitmap Descriptor
+
+2017-12-17 23:02:43 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Do not write second AVDP for small disks
+
+	  For small disks with less then 3072 blocks write only first and third AVDP.
+	  Two AVDPs are enough for UDF and it would increase partition space by about
+230 blocks. For large disks 230 blocks is just small percentage of whole
+	  capacity.
+
+2017-12-17 22:08:33 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Add sane memory allocation checks for length of LVD and USD
+
+2017-12-17 22:07:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix scanning VDS
+
+	  Prevent infinite loop by disabling backward jumps on disk.
+
+2017-12-17 21:52:18 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Add checks for number of partitions and length of IU in LVID
+
+	  Sane checks to prevent allocating too many memory.
+
+2017-12-17 21:19:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix possible integer overflow in count_table_blocks
+
+2017-12-17 17:22:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix option constants
+
+2017-12-17 17:21:58 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix scanning LVID
+
+	  Fix scanning sequence of LVID and prevent infinite loop by disallowing
+	  backward jumps on disk.
+
+2017-12-17 17:20:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix VAT error message
+
+2017-12-16 21:29:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Unify error messages
+
+2017-12-16 21:29:04 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Disable help for pktcdvd < 0.2.0
+
+	  pktcdvd >= 0.2.0 is in linux kernel since 2.6.10, so probably nobody use it.
+
+2017-12-16 21:28:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Make dev_name argument for setup optional
+
+	  udev already creates device nodes in /dev, therefore it is not needed to
+	  create them in pktsetup. So let dev_name optional and when is absent do not
+	  create device name in /dev.
+
+2017-12-16 20:44:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Update help
+
+2017-12-16 20:34:57 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix types
+
+2017-12-16 20:25:28 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Set SB descriptor CRC length to 8 as is recommended by UDF 2.60 (2.3.8.1)
+
+2017-12-16 20:20:23 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new option --mode for specifying permissions of the root directory
+
+2017-12-16 20:14:04 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix processing --uid and --gid options
+
+	  UDF uid and gid are 32bit unsigned integer, UINT32_MAX means invalid (not
+	  specified) user. Allow special value -1 which would be mapped to invalid
+	  user as before (because options were signed integers).
+
+	  Both options needs to be applied only for the root directory, not for all
+	  file entries.
+
+2017-12-16 20:12:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Rewrite --vsid length check to be more friendly for static code analysis
+
+2017-12-16 20:10:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Unify error messages
+
+2017-12-16 20:04:38 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Unify error messages
+
+2017-12-16 20:04:05 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Set appname
+
+2017-12-16 20:03:21 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Do not link libreadline to all executables
+
+	  AC_CHECK_LIB by default modifies LIBS and put there found library. Use
+	  space (= empty script) to overwrite this default behavior.
+
+2017-12-16 20:01:28 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add missing short option -m to getopt_long
+
+2017-12-16 20:00:46 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Create file image after validating all options
+
+	  This would prevent creating empty file on disk when UDF disk image is not
+	  possible with selected configuration.
+
+2017-12-16 19:33:04 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add checks for --media-type option
+
+2017-12-16 19:28:17 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add experimental support for Blu-Ray Disc Recordable with UDF 2.50
+
+	  BD-R does not use UDF 2.50 Metadata Partition, just only VAT. Therefore
+	  mkudffs should be able to generate correct image.
+
+2017-12-16 19:25:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add minimal support for UDF revision 2.50 and 2.60
+
+	  Currently it is supported only for configuration which does not use
+	  Metadata Partition.
+
+2017-12-16 19:21:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add support for DVD-R media type
+
+2017-12-16 19:21:21 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add support for CD-ROM media type
+
+2017-12-16 19:14:36 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix sizing and alignment for CD-R, CD-RW and DVD-RW discs
+
+2017-12-16 18:45:57 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix support for VAT and CD-R media type
+
+	  VAT file itself needs to be put into first partition and Strategy type 4096
+	  cannot be used in VAT, so disallow this combination.
+
+	  Now udfct does not report any error and Linux kernel is finally able to
+	  mount generated CD-R images.
+
+2017-12-16 18:37:37 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Correctly initialize UDF revision in VAT
+
+2017-12-16 18:22:12 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Allow to enable VAT via --vat option
+
+	  Before it was available only for CD-R discs.
+
+2017-12-16 18:01:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Missing break
+
+2017-12-16 14:31:07 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new option --sparspace for specifying number of entries in Sparing Table
+
+2017-12-16 14:28:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Allow to enable Sparing Table via --spartable option
+
+	  Before it was available only for CD-RW and DVD-RW discs.
+
+2017-12-16 14:26:22 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix calculation of entries in Sparing Table
+
+	  Ensure that number of entries is not more then allocated space for them.
+
+2017-12-16 14:16:14 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Maximize available partition space
+
+	  Optimize splitting algorithm to get more space for data storage. Move MVDS,
+	  LVID and when possible also STABLE and SSPACE before first ANCHOR. And then
+	  choose maximal available free space for partition/data storage.
+
+2017-12-16 14:06:41 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Ensure that one empty block is always after VRS
+
+	  It is required by UDF.
+
+2017-12-16 13:42:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix function prev_extent_size to align blocks correctly
+
+	  We want to align start location of the block, not end.
+
+2017-12-16 13:34:07 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Reduce warnings for VAT disks
+
+2017-12-16 13:22:20 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add short option -m for --media-type
+
+2017-12-15 18:13:23 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Completely remove option --bridge
+
+	  Its purpose was to generate UDF Bridge format, combination of ISO 9660 +
+	  OSTA UDF, but because mkudffs does not support ISO 9660 it never worked...
+
+2017-12-14 20:40:58 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix includes
+
+2017-12-14 20:12:54 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix crashes in udf_alloc_blocks
+
+	  Add checks that there is a free block.
+
+2017-12-14 18:03:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Show vatblock in output for VAT disks
+
+2017-12-14 18:00:26 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix possible NULL pointer dereference for VAT disks
+
+2017-12-14 00:45:08 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Add missing -- for options in error messages
+
+2017-12-14 00:43:23 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Add support for reading VAT stored inside of ICB
+
+2017-12-14 00:33:16 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Show UDF integrity in output
+
+2017-12-13 23:19:31 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix validation of --blocksize
+
+2017-12-13 20:37:45 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix printing accesstype
+
+2017-12-09 03:54:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix autodetection of UDF disks with blocksize above 4096
+
+2017-12-09 03:53:34 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix check for reading beyond end of disk
+
+2017-12-09 03:00:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix size and signedness of blocksize and blkssz
+
+2017-12-08 18:22:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Autodetect also UDF disks with blocksize values: 8192, 16384, 32768
+
+2017-12-08 18:21:59 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Allow specifying blocksize values: 8192, 16384, 32768
+
+2017-12-08 18:21:04 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Remove unused member blocksize_bits
+
+2017-12-08 18:20:33 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use disc->blocksize instead of disc->blocksize_bits
+
+2017-12-08 18:19:34 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Use disc->blocksize instead of disc->blocksize_bits
+
+2017-12-08 18:15:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use EXT_LENGTH_MASK instead of hardcoded constant
+
+2017-12-08 18:12:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Remove version-info
+
+	  Fixes libtool: warning: '-version-info/-version-number' is ignored for convenience libraries
+
+2017-12-07 23:58:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Improve CHS geometry in MBR
+
+	  Use HDIO_GETGEO ioctl for reading disk geometry. Fallback to LBA-Assist
+	  Translation when HDIO_GETGEO ioctl fails.
+
+2017-11-28 00:02:20 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinto: Increase limit for size of LVID and number of descriptors in VDS
+
+	  WORM media have bigger limits and udfinfo was not able to parse them.
+
+2017-11-27 23:58:28 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Add a new output key behindblocks
+
+	  It will contains number of blocks which are after the last block used by
+	  UDF filesystem. Therefore these blocks are unused by UDF filesystem itself
+	  and just waste space of the disk. GUI tools like Gparted would like to know
+	  this information and provide it to user as unallocated space.
+
+2017-11-26 17:18:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Update help for packetlen option
+
+2017-11-26 16:55:31 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix overflow in count_table_blocks
+
+2017-11-26 16:00:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Try to fix problems with strict-aliasing rules in function scan_vds
+
+2017-11-26 15:53:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Store sbd directly into struct instead of long int buffer
+
+	  This should fix breakage of strict-aliasing rules.
+
+2017-11-26 15:42:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix overflowing or truncating of st_len value
+
+2017-11-26 15:38:13 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix overflowing or truncating of return value from count_table_blocks
+
+2017-11-26 15:35:04 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix overflowing or truncating of use_len value
+
+2017-11-26 15:11:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Fix warning: comparison between signed and unsigned integer expressions
+
+2017-11-26 15:03:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfinfo: Add a new tool udfinfo which shows various information about UDF
+
+	  Currently it is unable to read Virtual Allocation Table, Metadata Partition
+	  and Pseudo-overwritable discs so some information are not always available.
+
+2017-11-26 15:03:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Add check in function set_extent
+
+2017-11-26 15:03:32 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Move function gen_uuid_from_vol_set_ident to file misc.c
+
+2017-11-26 15:03:15 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: gen_uuid_from_vol_set_ident: Do not complain when hex digits are not lowercase
+
+2017-11-26 13:44:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Move it back from sbin to bin
+
+	  It better fits into bin section as it is a user tool, not system
+	  administration tool.
+
+2017-11-26 11:19:41 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove check for valid size of MBR partition
+
+	  It does not work as disc.blocks is already truncated to 32 bit.
+
+2017-11-25 13:43:14 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Set default UDF revision to 1.50
+
+2017-11-24 22:26:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Update comments for RVDS and LVID
+
+2017-11-24 22:24:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Rename PVDS acronym to MVDS
+
+	  Correct name is Main Volume Descriptor Sequence. Not to be confused with
+	  PVD (Primary Volume Descriptor).
+
+2017-11-19 15:58:37 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Do not write second anchor point if it would be before first one
+
+	  Before first anchor point is stored Volume Descriptor Sequence and Volume
+	  Recognition Sequence and also reserved 32kB boot area, so prevent possible
+	  overlap.
+
+2017-11-19 15:39:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix parsing and printing udf revision in decimal format
+
+2017-11-19 14:22:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: By default set FLAG_EFE
+
+	  Default UDF revision is 2.01 for which EFE should be used. mkudffs already
+	  expects that EFE is set for revision 2.01.
+
+	  Now udfct does not report any error or warning for newly formatted media.
+
+2017-11-19 14:07:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix minimum LVID size
+
+	  For Rewriteable or Overwriteable media LVID should be at least 8K length.
+	  udfct reports this as an validation error.
+
+2017-11-19 03:31:33 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Pass file names via pointer and get rid off NAME_MAX
+
+2017-11-19 03:18:59 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Pass device name via pointer and get rid off NAME_MAX
+
+2017-11-19 03:00:36 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove debug comment output
+
+2017-11-19 00:41:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix udf_alloc_bitmap_blocks to not access invalid memory
+
+	  Inline functions udf_find_next_zero_bit and udf_find_next_one_bit read
+	  memory per 4 bytes. Space bitmap does not have to be aligned to 4 bytes, so
+	  do last read operation by memcpy with correct remaining size.
+
+2017-11-18 19:19:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Revert "libudffs: Fix reading from invalid memory"
+
+	  This reverts commit b5e774febc98d97e557d1e1bce19384f1b7dccb6.
+
+2017-11-16 00:58:51 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* ecma_167: Fix GP_PARTITION_MAP_TYPE_1 define name
+
+2017-11-16 00:57:53 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Add const to function parameters
+
+2017-11-14 00:15:58 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix function decode_string for FLAG_UNICODE8 and FLAG_UNICODE16
+
+2017-11-12 03:14:09 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Correctly initialize lvid in VAT as specified via --lvid
+
+2017-11-12 02:37:25 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Do not truncate device or file name and rather throw fatal error
+
+2017-11-12 02:26:48 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Do not truncate device name and rather throw fatal error
+
+2017-10-15 12:45:50 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Mark local functions and structures as static
+
+2017-10-15 12:36:56 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Style fixes
+
+2017-10-15 12:33:28 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add warning that UDF filesystems formatted on partition are not compatible with Apple systems
+
+2017-10-15 12:32:48 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix detection of the partition vs whole disk
+
+2017-10-10 21:36:16 +0200  Jakub Wilk <jwilk@jwilk.net>
+
+	* doc/mkudffs.8: Fix typos
+
+2017-10-07 22:21:42 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix checking for valid UTF-8 sequence in encode_utf8 function
+
+2017-09-30 11:53:10 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix another warning: dereferencing type-punned pointer will break strict-aliasing rules
+
+2017-09-30 11:44:20 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix another warning: dereferencing type-punned pointer will break strict-aliasing rules
+
+2017-09-30 11:09:47 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Make -Wstrict-aliasing warning fatal
+
+2017-09-30 11:08:55 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix warning: dereferencing type-punned pointer will break strict-aliasing rules
+
+2017-09-30 11:02:55 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix warning: dereferencing type-punned pointer will break strict-aliasing rules
+
+2017-09-30 01:02:12 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Test with more compilers (gcc, clang, tcc) and install only needed packages
+
+2017-09-30 00:44:59 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix compile errors: blockBuffer, newVATindex, prevVATlbn defined twice
+
+	  Detected by tcc compiler.
+
+2017-09-30 00:39:22 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Prefer 16-bit OSTA Compressed Unicode format for strings with 0x80-0xFF characters
+
+	  blkid from util-linux prior to version 2.30 did not decode non-ASCII
+	  strings in 8-bit OSTA Compressed Unicode format correctly. Therefore if it
+	  is possible encode all non-ASCII strings in 16-bit OSTA Compressed Unicode
+	  format.
+
+2017-09-28 09:54:14 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: In function decode_locale() handle EILSEQ error and replace non-representable character by '?'
+
+2017-09-10 15:38:34 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: For non-removable disks without partition table use by default --bootarea=mbr
+
+2017-07-23 14:38:26 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Allow 126 (resp. 63) characters in --label option
+
+	  Longer --vid would be truncated.
+
+2017-07-09 13:12:54 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Add jobs for 32 bit builds
+
+2017-07-06 12:53:26 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Disallow opening block device which is mounted or already in use
+
+	  This would prevent user to start formatting disk which is already mounted,
+	  used by kernel or exclusively open by userspace (e.g. another mkudffs
+	  instance) to prevent damage of data.
+
+	  Implementation of opening block device exclusively is race-free when /proc
+	  is available. When /proc is not available then there is a race condition
+	  between stat() and following open() call.
+
+	  New file disk image is also created exclusively to prevent creating new
+	  file by more processes. Processing existing file disk image is not changed.
+
+2017-07-06 00:48:27 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Parse and show UDF revision option in decimal notation
+
+	  Parsing UDF revision as hexadecimal number would still work.
+
+2017-07-06 00:17:42 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix parsing numeric options
+
+	  Throw error when non-numeric value or invalid number is specified for
+	  numeric option.
+
+2017-07-06 00:14:18 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Do not suggest to change blocksize
+
+	  UDF blocksize must match logical sector size of disk.
+
+2017-06-30 23:57:28 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix endianity in udf_set_version()
+
+2017-06-26 00:10:24 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Compile with -Wno-error=unused-function
+
+2017-06-26 00:04:25 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Compile with -Werror -Wno-error=strict-aliasing
+
+2017-06-25 23:52:55 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Check for signal value in sig_progress()
+
+2017-06-25 23:52:34 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* udffsck: Remove unused arguments
+
+2017-06-25 23:49:31 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove unused parameter 'pspace' from udf_alloc_bitmap_blocks() and udf_alloc_table_blocks() functions
+
+2017-06-25 23:45:31 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Remove unused parameter 'disc' from set_desc() function
+
+2017-06-25 23:40:48 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use typedef dchars where applicable
+
+2017-06-25 14:51:42 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Correctly decode UDF file name
+
+	  It is not stored as d-string, but rather as d-characters.
+
+2017-06-25 14:22:51 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Correctly decode d-string fileSetIdent
+
+	  Use decode_string which decodes d-string instead of decode_utf8 (which
+	  decodes d-characters).
+
+2017-06-25 13:20:43 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Use encode_locale instead of encode_utf8
+
+	  Print all d-characters in current locale instead of UTF-8.
+
+2017-06-25 12:01:06 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Set default UDF uuid to zero
+
+2017-06-25 11:20:05 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use gen_uuid_from_vol_set_ident for printing UDF uuid
+
+2017-06-25 11:18:40 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Add function gen_uuid_from_vol_set_ident for generating UDF uuid from Volume Set Identifier
+
+	  Use same algorithm as in util-linux v2.30.
+
+2017-06-25 11:07:17 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Print label according to set charset flag
+
+	  logicalVolIdent is d-string, not d-characters so decode_utf8 cannot be
+	  directly used.
+
+2017-06-24 21:47:31 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Update help
+
+2017-06-24 12:38:37 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Document new option --locale
+
+2017-06-24 12:38:08 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Clarify encoding options
+
+2017-06-24 10:47:57 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new option --locale
+
+	  It will treat ident string options as strings encoded according to current
+	  locale settings. And make it by default instead of --utf8.
+
+2017-06-24 10:44:04 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Add new flag FLAG_LOCALE and functions for encoding/decoding dstrings according to current locale
+
+2017-06-24 10:11:32 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Allow calling encode_string and decode_string with NULL disc parameter
+
+2017-06-23 19:55:28 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix check for too long --vsid option
+
+2017-06-23 19:50:00 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix handling of empty dstrings
+
+2017-06-23 19:45:49 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Add support for processing empty strings in decode_string and encode_string
+
+2017-06-23 19:41:23 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Returns -1 (instead of 0) from all encode/decode functions on error
+
+2017-06-23 13:35:02 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Do not manually set length after calling encode_string()
+
+	  Now it is done automatically by encode_string().
+
+2017-06-23 13:31:31 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: encode/decode_utf8 functions work with d-characters and encode/decode_string with d-string
+
+	  For d-characters use new dchars typedef and fix all functions to correctly
+	  handle d-characters and d-string buffers.
+
+2017-06-23 12:36:30 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* ecma_167: Add new typedef dchars for d-characters
+
+	  Fixed-length d-string and variable-length d-characters are different types,
+	  so correctly document it.
+
+2017-06-23 12:08:05 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* ecma_167: Fix type of pathComponent.componentIdent, it is d-characters not d-string
+
+2017-06-11 18:50:05 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix function encode_string when FLAG_UNICODE8 or FLAG_UNICODE16 is used
+
+	  It is needed to set length at last byte and erase remaining part of buffer.
+
+2017-06-11 18:44:25 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix function decode_string when FLAG_UNICODE8 or FLAG_UNICODE16 is used
+
+	  We need to correctly decode dstring based on first byte.
+
+2017-06-11 18:42:39 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Fix buffer overflow in decode_utf8 and decode_string functions
+
+	  Add new argument for specifying size of output buffer.
+
+2017-06-11 18:35:48 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* unicode: Remove hdr argument from encode_* functions as it is not used anymore
+
+2017-06-11 18:24:10 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix --vsid and --uuid options to correctly compose OSTA Unicode d-strings
+
+2017-06-08 08:39:47 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix default block size
+
+2017-06-08 08:32:37 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix mbr ending_chs
+
+2017-06-08 00:42:13 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Fix formatting
+
+2017-06-08 00:41:38 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: For hard disk set default block size to 512
+
+2017-05-21 19:45:20 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new option --bootarea=mbr to fill MBR table into UDF boot area
+
+	  There will be only one partition in MBR table which starts at sector 0
+	  (includes MBR itself) and span whole disk device.
+
+	  It is needed for hard disk compatibility with Microsoft Windows systems as
+	  Windows does not recognize non-removable hard disk without MBR table.
+
+	  On the other hand Apple Mac OS X systems does not recognize UDF filesystem
+	  formatted on partition and to detect UDF correctly, filesystem must be
+	  present from the beginning of disk. If MBR table is presnt then it is
+	  ignored by Mac OS X.
+
+2017-05-21 19:22:22 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add new option --bootarea=preserve|erase to preserve or erase UDF boot area
+
+	  In most cases UDF boot area (first 32kB of disk) is not used and therefore
+	  it is better to erase it. By default when mkudffs formatting hard disk will
+	  erase UDF boot area which cleanup headers of previous filesystems. So hard
+	  disk would not be false positive detected as other filesystem which was
+	  there before formatting to UDF.
+
+2017-05-20 10:14:39 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Force uuid to be in lowercase hexadecimal digit format
+
+2017-05-01 13:21:04 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/wrudf.8: Specify correct manpage section (8)
+
+2017-03-03 18:42:57 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Fix coverity job
+
+2017-02-26 18:00:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Simplify configuration, move coverity_scan to matrix
+
+2017-01-23 23:15:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Release version 1.3
+
+2017-01-23 23:14:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Makefile.am: Include ChangeLog in dist tarball
+
+2017-01-22 23:32:25 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Write info about --media-type=cdr, --closed and --packetlen
+
+2017-01-22 14:48:00 +0100  Fabian Frederick <fabf@skynet.be>
+
+	* configure: check readline earlier
+
+	  Currently, we have to run autogen/configure/make to see missing library:
+
+	  libtool: link: gcc -g -O2 -o wrudf wrudf.o wrudf-cmnd.o wrudf-desc.o
+	  wrudf-cdrw.o wrudf-cdr.o ide-pc.o  ../libudffs/.libs/libudffs.a
+	  -lreadline
+	  /usr/bin/ld: cannot find -lreadline
+
+	  This patch adds an error in configure.ac
+
+	  Signed-off-by: Fabian Frederick <fabf@skynet.be>
+
+2017-01-22 14:37:16 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix buffer overflows
+
+2017-01-22 14:37:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix crash when readLine() return NULL (on EOF)
+
+2017-01-22 13:15:03 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Move wrudf manpage to section 8
+
+2017-01-22 13:14:35 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Remove old ChangeLog files
+
+2017-01-22 13:04:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix sources in Makefile.am
+
+2017-01-22 13:03:57 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Remove old address in CONTACTS and update AUTHORS
+
+2017-01-22 12:56:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Makefile.am: Include autogen.sh and Doxyfile in dist tarball
+
+2017-01-22 12:55:54 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Include manpages in dist tarball
+
+2017-01-22 12:55:25 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Remove hardcoded flag -D_LARGEFILE64_SOURCE
+
+	  It is not needed anymore as autoconf's AC_SYS_LARGEFILE takes care of LFS.
+
+2017-01-22 12:53:19 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* include: Remove unused file udf_lib.h
+
+2017-01-21 16:15:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Set CFLAGS
+
+2017-01-21 16:13:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Do not use GNU old-style field designator extension
+
+2017-01-21 15:43:34 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix types passed to more functions
+
+2017-01-21 15:42:45 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix types
+
+2017-01-21 15:40:23 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix types
+
+2017-01-21 15:00:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Fix types
+
+2017-01-21 14:55:32 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Fix types
+
+2017-01-21 14:42:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix types passed to more functions
+
+2017-01-21 14:40:32 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix calling udf_create() function
+
+	  It needs file name with the OSTA unicode compression type in the first byte.
+
+2017-01-21 14:38:18 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix types
+
+2017-01-21 14:37:11 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Use correct types in unicode functions
+
+2017-01-21 14:10:13 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Revert "wrudf: Fix check for Unallocated Space Bitmap"
+
+	  This reverts commit 585f8923f580f950a4732c7063855d301896d5b1.
+
+	  It broke CDR support which is working without space map.
+
+2017-01-21 13:23:04 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix types and check for errors in lseek/read/write
+
+2017-01-21 13:19:33 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Do not exit if setpriority fails
+
+2017-01-21 13:19:21 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Add help command
+
+2017-01-21 13:18:59 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix crash when parseCmnd() get NULL
+
+2017-01-21 13:17:18 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix output from decode_utf8
+
+2017-01-21 13:16:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Show warning that PD_ACCESS_TYPE_OVERWRITABLE is not supported
+
+2017-01-21 13:16:02 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix check for Unallocated Space Bitmap
+
+2017-01-21 13:15:14 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fail if no PD found
+
+2017-01-21 13:13:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Allocate packet buffer also for CDRW DISK_IMAGE type
+
+	  Packet buffer is always needed when media type is CDRW
+
+2017-01-21 11:11:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix resource leaks in copyFile and copyDirectory
+
+2017-01-21 11:10:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Correctly check for errors
+
+2017-01-21 11:09:11 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix size of array
+
+2017-01-20 12:21:05 +0100  Jan Kara <jack@suse.cz>
+
+	* mkudffs: Properly initialize the first extent
+
+	  Properly initialize the first extent describing disk's space. Otherwise
+	  disc->first->blocks can contain random garbage which further confuses
+	  code into thinking user has provided desired filesystem length.
+
+	  Signed-off-by: Jan Kara <jack@suse.cz>
+
+2017-01-15 01:25:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Fix pktsetup to work
+
+2017-01-12 00:05:25 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Fix resource leak in setup_dev function
+
+2017-01-11 23:50:58 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Fix setup_dev function
+
+	  It did nothing as after init_cdrom() call it returned and ioctl() was not called.
+
+2017-01-11 22:46:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Check for mknod errors
+
+2017-01-11 22:45:34 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Check for Out-of-bounds read
+
+2017-01-11 22:43:41 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Fix memory leaks
+
+2017-01-11 21:20:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Show warning when trying to use more then 2^32-1 blocks
+
+2017-01-11 21:13:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Validate block-count parameter
+
+2017-01-11 21:11:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix printf numeric formats
+
+2017-01-08 12:40:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Generare build matrix automatically
+
+2017-01-07 19:12:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Fix buffer overflow in get_misc_minor
+
+2017-01-07 19:12:25 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: When mkudffs fails show also error message
+
+	  Return value is enough for scripts but not for interactive user.
+
+2017-01-07 19:00:56 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* travis: Add .travis.yml for Coverity Scan
+
+2016-12-19 00:24:22 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Remove AC_CHECK_FUNCS as nobody check for presence of those functions
+
+2016-12-19 00:13:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use lseek and off_t
+
+	  AC_SYS_LARGEFILE now takes care to be correctly 64bit.
+
+2016-12-19 00:12:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* configure: Use AC_SYS_LARGEFILE for large file support
+
+	  This is needed for correct support of large files on 32bit systems.
+
+2016-12-19 00:11:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Include config.h before any other includes
+
+	  Otherwise macros which change behavior of other includes do not take effect.
+
+2016-07-02 20:44:35 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix mktime() usage
+
+	  Function mktime() returns time_t which does not have to be unsigned long
+	  int. E.g. on x32 architecture it (signed) long long int.
+
+2016-07-02 18:38:26 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/cdrwtool.1: Fix spelling
+
+2016-06-29 19:13:05 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* Release version 1.2
+
+2016-06-29 18:39:08 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* Makefile.am: Install also README and NEWS files
+
+2016-06-29 18:29:36 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* NEWS: Update for 1.1
+
+2016-06-29 18:17:46 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* ChangeLog: Remove content of unused file
+
+2016-06-29 18:16:10 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* README: Add short text
+
+2016-06-28 22:16:42 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Add info about hex values
+
+2016-05-29 14:41:12 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Fix parsing --file parameter
+
+	  Error reported by Mayhem: https://bugs.debian.org/715720
+
+2016-05-29 13:51:14 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix install/uninstall hook for mkfs.udf symlink
+
+2016-05-29 13:50:42 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Do not install static libudffs library
+
+2016-05-29 13:50:16 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Correctly install all text documentation files
+
+2016-05-29 13:20:22 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc: Fix syntax of pktsetup.8 file
+
+2016-05-29 13:12:15 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix spelling error writeable => writable
+
+2016-05-05 13:40:39 +0000  Steve Kenton <skenton@ou.edu>
+
+	* doc: Add more references to UDF-Specifications
+
+	  IEC/ISO standards normally cost money, add a URL to the free
+	  PDF downloads of the co-published versions from ECMA
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-04-20 16:54:22 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* Rename bootstrap to autogen.sh
+
+2016-04-08 00:49:27 -0400  Mike Frysinger <vapier@gentoo.org>
+
+	* man: add a mkfs.udf(8) redirect
+
+	  Since mkfs.udf is installed as a symlink, add a man page symlink too.
+
+2016-04-07 22:22:28 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* Release version 1.1
+
+	  Remove also old version numbers, contains, etc... and update doc
+
+2016-04-07 22:22:01 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Do not link with ncurses library, it is not used
+
+2016-04-05 21:21:51 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Set default uid and gid to 0
+
+	  Linux kernel makes inodes with -1 uid/gid readonly if mount is not called
+	  with uid/gid params. So it does not work as expected and cause problems...
+	  Rather set uid and git by default to 0.
+
+2016-04-03 12:13:16 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* all: Move defaults.h to mkudffs
+
+2016-04-03 12:08:20 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Remove defaults.c because it is not used
+
+2016-04-03 12:07:49 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Remove own copy of defaults.c
+
+2016-04-03 12:06:44 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Move file.c to mkudffs
+
+2016-03-28 15:19:20 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Fix description for --fullvsid option
+
+2016-03-19 00:33:17 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* deb: Remove debian packaging files
+
+2016-03-14 12:18:45 -0500  Steve Kenton <skenton@ou.edu>
+
+	* configure: Remove configure check for getopt.c/h
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-03-14 11:56:14 -0500  Steve Kenton <skenton@ou.edu>
+
+	* getopt: Remove copies of getopt.c/h and use installed versions
+
+	  All the systems we care about should have getopt at this point in time
+	  so remove the old copies of getopt.h and getopt.c and use versions in
+	  /usr/include and glibc instead
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-03-14 11:56:13 -0500  Steve Kenton <skenton@ou.edu>
+
+	* configure: Rename and tidy configure.in
+
+	  Running automake suggest renaming configure.in -> configure.ac
+	  so go ahead and go it. While looking at it remove the now
+	  unused open64 check
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-03-13 00:05:32 +0100  Steve Kenton <skenton@ou.edu>
+
+	* all: Assorted comments and doxygen blocks and misc
+
+	  Misc is stuff like move a code block to be consistent between if and else
+	  Rename fc->filechars to be consistent with other usage
+	  Add the UDF-Specifications reference with never made it in
+	  Some minor style changes with initializer as I was documenting functions
+	  The Doxygen stuff has not been tested much but it seemed silly not to
+	  format the function comments for automatic doc generation while at it
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-03-11 10:09:15 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Comment out the lost+found directory creation
+
+	  The lost+found directory is Unix specific and unexpected on a UDF disc,
+	  plus the fact that we don't have a fsck so just comment it out for now.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-03-11 10:09:14 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Make all modificiation to FE/EFE before calling insert_fid to compute CRCs
+
+	  This worked by accident before because of some redundant insert_fid calls
+	  and a peculiar relationship between the <root> and lost+found directories.
+	  Move setting uid/gid into udf_create and finish all modifications to the
+	  FE/EFE before calling insert_fid to calculate the descriptor CRCs
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-03-08 09:20:41 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Fix a copy/paster error from way back when
+
+	  These make no difference good or bad to the disc formatting but
+	  make reading the code much less confusing.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-03-08 09:20:40 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Minor fixes to make Philips udf_test happier
+
+	  These reduce the number of errors reported by udf_test for a UDF disc
+	  Checkpoint is supposed to start at one, not zero and interchange level
+	  three seems appropriate as a default.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-02-15 12:18:28 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Spare table not supported for v1.02
+
+	  Neither spare table nor virtual allocation table are support for v1.02
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-02-15 11:20:09 -0600  Steve Kenton <skenton@ou.edu>
+
+	* doc/mkudffs.8: Update manpage
+
+	  Add DVDRW to the man page and mention some ordering constraings.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-02-15 10:05:12 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Clarify sizing defaults a bit
+
+	  Add some comments to the default_sizing table and use structure assignment
+	  rather than memcpy since it's clearer in this case.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-02-14 21:43:04 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Remove open/open64 test in main()
+
+	  Largefile support may have still been an issue >10 year ago
+	  when udftools development at sourceforge stopped, but these
+	  days everything is largefile aware.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-02-14 20:42:06 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Remove unneeded version check in udf_init_disc
+
+	  Nothing in or called by udf_init_disc cares about FLAG_EFE and
+	  this check is already done more completely in udf_set_version
+	  so just delete the duplicate version check etc.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-02-14 20:31:43 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Remove duplicate memset
+
+	  udf_init_disc already does a memset on entry
+	  so delete the duplicate memset immediately
+	  before the call to udf_init_disc and change
+	  and assignment to initialize while at it.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-02-14 13:34:02 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: VAT not supported for v1.02
+
+	  Clear FLAG_VAT for version 1.02 since it's not supported
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2016-02-12 19:49:45 -0600  Steve Kenton <skenton@ou.edu>
+
+	* mkudffs: Check FLAG_EFE rather than udf_rev
+
+	  I was getting a segmentation fault/core dump with this command line:
+
+	  mkudffs --u8 --udfrev=0x0102 --blocksize=2048 --lvid="HDi-250 DVD" --strategy=4 \
+	--media-type=dvdrw --space=unallocbitmap --ad=inicb --noefe /dev/sr0
+
+	  The segfault was caused by a subscript of -1 while lookup for a descriptor
+	  but the root cause was using extended file entries on a UDF-1.02 disc
+	  where they are not supported. The check for version == 1.50 should have
+	  been <= 1.50, but checking for FLAG_EFE is better since it also deals
+	  with the --noefe option.
+
+	  Signed-off-by: Steve Kenton <skenton@ou.edu>
+
+2015-07-10 16:06:59 +0200  Jan Kara <jack@suse.com>
+
+	* mkudffs: Fix creation of unalloc table
+
+	  Creation of unalloc table was broken and the table tracked ICB with the
+	  table as empty space which was then readily rewritten by the fileset
+	  ICB resulting in corrupted filesystem.
+
+	  Fix the problem by recording ICB with unalloc table as used space and
+	  also add a check reporting error when too large filesystem with unalloc
+	  table should be created instead of creating corrupted fs.
+
+	  Signed-off-by: Jan Kara <jack@suse.com>
+
+2015-07-10 14:15:04 +0200  Jan Kara <jack@suse.com>
+
+	* cdrw-tool: Define HZ if not defined in headers
+
+	  On some older distros, HZ is not defined in expected header files. So
+	  define it when needed.
+
+	  Signed-off-by: Jan Kara <jack@suse.com>
+
+2015-07-05 11:30:15 +0200  Pali Rohár <pali.rohar@gmail.com>
+
+	* Fix code to be compatible with C99 inline semantic
+
+	  This commit fix compilation under GCC 5.
+
+2014-12-17 17:31:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add symlink for mkfs.udf
+
+2014-12-17 16:37:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Install mkudffs, pktsetup and wrudf to sbin (instead bin)
+
+2014-12-17 13:13:44 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add support for setting uid and gid of the root directory
+
+	  By default uid and gid will be -1. Before this patch it was 0.
+
+2014-12-16 22:22:00 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Add info about label and uuid
+
+2014-12-16 22:07:43 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add support for label and uuid options
+
+	  New option --label (and -l) is just synonym for options --lvid and --vid. UDF
+	  specification says that Logical Volume Identifier is name which is typically
+	  displayed to the user. Other UDF software and also other OS are using field
+	  Logical Volume Identifier as label or disc name, so mkudffs should do it too.
+	  But Linux library libblkid (part of linux-utils package) read label from field
+	  Volume Identifier. So for compatibility we need to set both --lvid and --vid
+	  options to be same.
+
+	  New option --uuid (and -u) set first 16 chars of Volume Set Identifier. UDF FS
+	  does not have any UUID field in specification, but first 16 chars of Volume Set
+	  Identifier perfectly fit for UUID definitions. UDF specification says that it
+	  should be set to unique value which is not trivial and not fixed.
+
+	  New option --fullvsid set full Volume Set Identifier. Option --vsid also before
+	  this patch set only second part of Volume Set Identifier, so it was not possibe
+	  to set full string in Volume Set Identifier. To not bring regressions, use new
+	  option --fullvsid. When used this option overwrite previous --uuid and --vsid
+	  options.
+
+	  This patch also adds code which print filename, label, uuid, blocks, blocksize
+	  and udfrev when mkudffs starts creating UDF filesystem.
+
+2014-12-16 22:07:06 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Update block-size
+
+2014-12-16 22:06:10 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Set default block-size to device logical block (sector) size
+
+2014-12-16 21:59:29 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Set first 16 chars of Volume Set Identifier to timestamp and random value
+
+	  According to UDF specification, first 8 chars should be timestamp (hexadecimal
+	  number) and second 8 chars should be non trivial and non fixed value. We will
+	  set it to random hexadecimal number (from /dev/urandom).
+
+2014-12-16 17:23:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Check for return value of system function
+
+2014-12-16 17:10:55 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* pktsetup: Do not crash if is called with invalid number of arguments
+
+2014-12-16 17:00:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Check for return value of wait_cmd() in sig_progress()
+
+2014-12-16 16:57:50 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Fix support for bigendian systems
+
+2014-12-16 16:27:24 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix support for bigendian systems
+
+2014-12-16 13:51:22 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Remove unused variable rv
+
+2014-12-16 13:42:43 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Check return value of system and chdir calls
+
+2014-12-16 11:01:07 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Make sure that name will be NUL termined
+
+2014-12-16 10:56:40 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Show error message when --u8/--u16/--utf8 option is not specified as first argument
+
+2014-12-16 09:50:59 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Remove unused variables
+
+2014-12-16 09:50:11 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Do not ignore lseek error in write_func()
+
+2014-12-15 22:45:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Check if --lvid, --vid, --vsid and --fsid options are not too long
+
+2014-12-15 22:41:15 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Check if device has enough blocks for formatting
+
+2014-12-15 22:19:47 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Check for return value from functions next_extent, prev_extent, next_extent_size, prev_extent_size
+
+	  These functions could fail (return 0 or NULL) and we should not continue
+
+2014-12-15 22:15:17 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix reading from uninitialized memory
+
+	  Properly initialize reserved field, because malloc does not initialize it
+
+2014-12-15 21:50:52 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix buffer overflow when calling with --vsid= option
+
+2014-12-15 21:45:00 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: It accept also -h
+
+2014-12-15 21:28:36 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Add support for reading blocks of regular file via fstat
+
+2014-12-15 21:28:12 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Use new ioctl BLKGETSIZE64 in function get_blocks
+
+2014-12-15 20:29:34 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Include sys/ioctl.h, linux/fs.h and linux/fd.h files
+
+	  They are needed for BLKGETSIZE and FDGETPRM ioctl calls
+
+2014-12-15 16:59:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Check for errors after calling open
+
+2014-12-14 22:55:41 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix decoding to utf8, stop at first nul utf8 byte
+
+2014-12-14 22:21:22 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix decoding to utf8, first byte contains compression code
+
+2014-12-14 21:44:07 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix buffer overflow in encoding unicode strings
+
+2014-12-14 20:47:31 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Do not allow overwriting smaller blocks in function set_extent
+
+2014-12-14 20:46:20 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix function prev_extent_size
+
+2014-12-14 20:43:38 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix reading from invalid memory
+
+	  Increase buffer length for one unsigned long which is needed by udf_alloc_bitmap_blocks
+
+2014-12-13 22:51:42 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* libudffs: Fix utf8 decode and encode
+
+2014-12-13 21:41:14 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* doc/mkudffs.8: Update manpage to reflect default settings
+
+2014-12-13 17:34:10 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udfct: Remove empty udfct from tree
+
+2014-12-13 17:10:01 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udffsck: Do not install binary, it is only empty stub
+
+2014-12-13 17:09:57 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* udffsck: Remove defaults.c file which is not needed
+
+2014-12-13 17:09:38 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* Remove .cvsignore files
+
+2014-12-13 01:02:39 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* wrudf: Fix errors reported by Coverity static analysis tool
+
+2014-12-13 01:02:27 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* mkudffs: Fix errors reported by Coverity static analysis tool
+
+2014-12-13 01:02:13 +0100  Pali Rohár <pali.rohar@gmail.com>
+
+	* cdrwtool: Fix errors reported by Coverity static analysis tool
+
+2014-12-13 00:39:33 +0100  Magnus Granberg <zorry@ume.nu>
+
+	* pktsetup: Remove nonsense O_CREAT flag
+
+	  This patch comes from Gentoo project
+
+2014-12-13 00:35:10 +0100  Ben Peddell <klightspeed@klightspeed.is-a-geek.net>
+
+	* cdrwtool: Fix CD blanking for kernels 2.6.8 and newer
+
+	  Write access is required to perform blanking commands
+
+	  This patch comes from Gentoo project
+
+2014-12-12 23:27:41 +0100  Frantisek Kluknavsky <fkluknav@redhat.com>
+
+	* doc: Update manpages
+
+	  This patch comes from Fedora project
+
+2014-12-12 23:25:25 +0100  Frantisek Kluknavsky <fkluknav@redhat.com>
+
+	* doc: Add wrudf manpage
+
+	  This patch comes from Fedora project
+
+2014-12-12 23:24:25 +0100  Frantisek Kluknavsky <fkluknav@redhat.com>
+
+	* wrudf: Add basic help
+
+	  This patch comes from Fedora project
+
+2014-12-12 23:22:33 +0100  Honza Horák <hhorak@redhat.com>
+
+	* libudffs: Fix null pointer dereference
+
+	  Test case:
+	  $ dd if=/dev/zero of=udf.iso bs=2048 count=100
+	  $ mkudffs udf.iso
+	  Segmentation fault
+
+	  This patch comes from Fedora project
+
+2014-12-12 17:01:10 +0100  Henrique de Moraes Holschuh <hmh@debian.org>
+
+	* pktsetup: return meaningful exit status on errors
+
+	  pktsetup seems to always return exit status 0 (ok) even when something goes wrong.
+
+	  Stuff like:
+	    trying to register an already registered device
+	    trying to de-register an unbound device
+
+	  should return a non-zero exit status.
+
+	  This patch comes from Debian project
+
+2014-12-12 17:00:07 +0100  Richard Atterer <atterer@debian.org>
+
+	* doc: Add HOWTO.udf
+
+	  This documentation text comes from Debian project
+
+2014-12-12 16:52:41 +0100  Richard Atterer <atterer@debian.org>
+
+	* doc: Update manpages
+
+	  This patch comes from Debian project
+
+2007-09-27 16:33:21 +0000  Harald Hoyer <harald@redhat.com>
+
+	* even more compile fixes
+
+2007-09-27 16:32:32 +0000  Harald Hoyer <harald@redhat.com>
+
+	* more compile fixes
+
+2007-09-27 16:31:20 +0000  Harald Hoyer <harald@redhat.com>
+
+	* fix some compile warnings
+
+2007-09-27 16:29:49 +0000  Andreas Jochens <aj@andaco.de>
+
+	* With the attached patch 'udftools' can be compiled
+	  on amd64 using gcc-4.0.
+
+2007-09-27 16:28:25 +0000  Harald Hoyer <harald@redhat.com>
+
+	* make tagSerialNum bigendian compatible
+
+2007-09-27 16:26:22 +0000  Peter Osterlund <petero2@telia.com>
+
+	* And here is a patch for udftools-1.0.0b3 that updates the pktsetup
+	  program to make it able to use the character device for block device
+	  setup/teardown.
+
+2004-03-02 02:09:39 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* add missing byte swap to two numPartitionMaps uses
+
+2004-02-27 00:04:36 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* update date
+
+2004-02-27 00:02:53 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* fix shared build
+
+2004-02-26 23:46:22 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* pull version from configure.ac
+
+2004-02-26 23:45:50 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* fix building outside of the directory
+
+2004-02-23 03:35:33 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* check udf_rev and not disc->udf_rev for version info
+
+2004-02-23 03:33:11 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* pass write results back through calling function
+
+2003-10-24 01:52:14 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* configure cleanups with udfct directory
+
+2003-10-24 01:16:04 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* add optional size to -q
+
+2003-10-24 01:10:31 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* update
+
+2003-10-24 01:04:14 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* use inttypes.h
+
+2003-10-24 01:03:39 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* updated
+
+2003-10-24 01:03:19 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* autoconf updates
+
+2003-10-24 00:05:47 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* updated
+
+2003-10-24 00:05:13 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* added to bootstrap the cvs repository
+
+2002-12-28 04:48:51 +0000  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* set grow bit to 0
+
+2002-02-09  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* Added man pages from Paul Thompson <set@pobox.com>
+
+2002-01-30  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
+
+	* Initial Release

@@ -1,0 +1,61 @@
+# Built objects
+*.pyc
+*.obj
+*.o
+*.a
+*.lib
+*.so
+*.dll
+*.exe
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/navEditor.xml
+.idea/modules.xml
+.idea/modules/
+.idea/vcs.xml
+.idea/codeStyles/
+.idea/inspectionProfiles/
+out/
+
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Android specific
+local.properties
+.externalNativeBuild/
+.cxx/
+captures/
+*.apk
+*.ap_
+*.dex
+*.class
+
+# Kotlin
+.kotlin/
+
+# NDK
+obj/
+libs/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Other
+*.log
+*.swp
+*~
+.temp
+.artifacts/

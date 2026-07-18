@@ -1,0 +1,87 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define HAVE_STDINT_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STRING_H 1
+#define HAVE_UNISTD_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_SYS_TYPES_H 1
+#define HAVE_FCNTL_H 1
+#define HAVE_ERRNO_H 1
+#define HAVE_LIMITS_H 1
+#define HAVE_CTYPE_H 1
+#define HAVE_STDIO_H 1
+#define HAVE_STDARG_H 1
+#define HAVE_TIME_H 1
+#define HAVE_SYS_TIME_H 1
+#define HAVE_SYS_IOCTL_H 1
+#define HAVE_GETOPT_H 1
+#define HAVE_ENDIAN_H 1
+#define HAVE_INTTYPES_H 1
+#define HAVE_SYS_SYSMACROS_H 1
+#define HAVE_STRINGS_H 1
+#define HAVE_LOCALE_H 1
+#define HAVE_SYS_MMAN_H 1
+#define HAVE_SYS_MOUNT_H 1
+#define HAVE_SYS_RESOURCE_H 1
+#define HAVE_SYS_UTSNAME_H 1
+#define HAVE_LINUX_FALLOC_H 1
+#define HAVE_LINUX_FD_H 1
+#define HAVE_LINUX_HDREG_H 1
+#define HAVE_LINUX_MAJOR_H 1
+#define HAVE_LINUX_LOOP_H 1
+#define HAVE_LINUX_TYPES_H 1
+#define HAVE_MNTENT_H 1
+#define HAVE_NET_IF_H 1
+#define HAVE_NETINET_IN_H 1
+#define HAVE_SYS_SOCKET_H 1
+#define HAVE_SYS_UN_H 1
+
+#define HAVE_PREAD 1
+#define HAVE_PWRITE 1
+#define HAVE_STRCASECMP 1
+#define HAVE_STRDUP 1
+#define HAVE_STRERROR 1
+#define HAVE_STRFTIME 1
+#define HAVE_STRNLEN 1
+#define HAVE_STRTOLL 1
+#define HAVE_STRTOULL 1
+#define HAVE_SETLOCALE 1
+#define HAVE_GETPAGESIZE 1
+#define HAVE_MMAP 1
+#define HAVE_MUNMAP 1
+#define HAVE_MSYNC 1
+#define HAVE_FSYNC 1
+#define HAVE_FSTAT64 1
+#define HAVE_LSEEK64 1
+/* #undef HAVE_LLSEEK */
+#define HAVE_LSEEK64 1
+#define HAVE_LSEEK64_PROTOTYPE 1
+#define HAVE_FTRUNCATE64 1
+
+#define SIZEOF_SHORT 2
+#define SIZEOF_INT 4
+#define SIZEOF_LONG 8
+#define SIZEOF_LONG_LONG 8
+#define SIZEOF_OFF_T 8
+
+/* #undef ENABLE_NLS */
+#define PACKAGE_NAME "e2fsprogs"
+#define PACKAGE_VERSION "1.46.5"
+
+#define ROOT_SYSCONFDIR "/etc"
+
+#define HAVE_SYSCONF 1
+#define HAVE_GETUID 1
+#define HAVE_GETEUID 1
+#define HAVE_GETGID 1
+#define HAVE_GETEGID 1
+#define HAVE_PRCTL 1
+#define HAVE_SYS_PRCTL_H 1
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+#endif

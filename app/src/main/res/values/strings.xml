@@ -1,0 +1,84 @@
+<resources>
+    <string name="app_name">FormatStickPro</string>
+    <string name="status_waiting">Aștept să bagi stick-ul în mufă...</string>
+    <string name="label_file_system">Sistem Fișiere:</string>
+    <string name="label_cluster_size">Dimensiune Cluster:</string>
+    <string name="label_partition_table">Tabel Partiție:</string>
+    <string name="btn_format">Formatează stick-ul (USB SCSI)</string>
+    <string name="status_ready_to_format">Stick gata de formatare: %1$s</string>
+    <string name="status_disconnected">Stick deconectat. Aștept...</string>
+    <string name="status_device_found">Stick găsit: %1$s\nCerem permisiune...</string>
+    <string name="status_format_success">Victorie! Stick-ul a fost formatat.</string>
+    <string name="status_format_error">Eroare! Ceva n-a mers la scriere.</string>
+    <string name="status_error_generic">EROARE: %1$s</string>
+    <string name="status_stage">Etapă: %1$s</string>
+    <string name="status_starting">Am început formatarea…</string>
+    <string name="status_check_notification">Verifică bara de sus pentru progres!</string>
+    <string name="progress_percentage">%1$d%%</string>
+    <string name="btn_lang">RO</string>
+    <string name="permission_denied">Ai refuzat permisiunea!</string>
+    <string name="permission_denied_text">Permisiune refuzată!</string>
+    <string name="notif_title">FormatStickPro</string>
+    <string name="notif_preparing">Pregătesc stick-ul…</string>
+    <string name="notif_success_title">Formatare Reușită!</string>
+    <string name="notif_error_title">Formatare Eșuată</string>
+    <string name="notif_success_text">Stick-ul tău e gata de folosire.</string>
+    <string name="notif_error_text">Hopa! Ceva n-a mers bine.</string>
+    <string name="notif_progress">Formatare: %1$d%%</string>
+    <string name="notif_channel_name">Formatare USB</string>
+    <string name="error_usb_access">Eroare acces USB.</string>
+    <string name="stage_initializing">Curățare stick…</string>
+    <string name="stage_ntfs">Creare sistem NTFS…</string>
+    <string name="stage_mft">Configurare tabele MFT…</string>
+    <string name="stage_boot">Scriere sector boot…</string>
+    <string name="stage_sync">Sincronizare date…</string>
+    <string name="stage_compression_info">Info: Compresie dezactivată (standard).</string>
+    <string name="stage_success">Formatare finalizată cu succes!</string>
+    <string name="stage_error">Eroare: %1$s</string>
+
+    <string name="about_title">Despre FormatStickPro</string>
+    <string name="about_description">O unealtă profesională pentru formatarea dispozitivelor USB direct de pe Android, folosind drivere native SCSI. &lt;br/&gt;&lt;br/&gt;&lt;b&gt;Suport Telegram:&lt;/b&gt; &lt;a href="https://t.me/NotzOs66"&gt;t.me/NotzOs66&lt;/a&gt;</string>
+    <string name="about_legal_notice">Acest program este Software Liber, distribuit sub licența GNU GPL v3. &lt;br/&gt;&lt;br/&gt;&lt;font color="#FF5252"&gt;&lt;b&gt;ATENȚIE:&lt;/b&gt;&lt;/font&gt; Utilizarea se face pe propria răspundere. Autorul nu este responsabil pentru eventuale pierderi de date sau defectări hardware.</string>
+    <string name="about_libraries_title">Biblioteci Open Source utilizate:</string>
+    <string name="about_libraries_content">
+        • &lt;b&gt;NTFS-3G&lt;/b&gt; (GPLv2/LGPLv2)&lt;br/&gt;
+        • &lt;b&gt;e2fsprogs/libext2fs&lt;/b&gt; (GPLv2/LGPLv2)&lt;br/&gt;
+        • &lt;b&gt;exfat-utils&lt;/b&gt; (GPLv2)&lt;br/&gt;
+        • &lt;b&gt;f2fs-tools&lt;/b&gt; (GPLv2)&lt;br/&gt;
+        • &lt;b&gt;xfsprogs&lt;/b&gt; (GPLv2/LGPLv2.1)&lt;br/&gt;
+        • &lt;b&gt;udftools&lt;/b&gt; (GPLv2)&lt;br/&gt;
+        • &lt;b&gt;libusb&lt;/b&gt; (LGPLv2.1)&lt;br/&gt;
+    </string>
+    <string name="btn_close">Închide</string>
+    <string name="btn_share_logs">Trimite Log-uri (Debug)</string>
+    <string name="logs_share_title">Trimite Log-uri către Autor</string>
+    <string name="logs_error_capture">Eroare la capturarea log-urilor.</string>
+
+    <string-array name="fs_types">
+        <item>NTFS</item>
+        <item>FAT32</item>
+        <item>FAT16</item>
+        <item>FAT12</item>
+        <item>exFAT</item>
+        <item>Ext2</item>
+        <item>Ext3</item>
+        <item>Ext4</item>
+        <item>F2FS</item>
+        <item>UDF</item>
+        <item>XFS</item>
+    </string-array>
+
+    <string-array name="cluster_sizes">
+        <item>4096</item>
+        <item>8192</item>
+        <item>16384</item>
+        <item>32768</item>
+        <item>65536</item>
+    </string-array>
+
+    <string-array name="partition_types">
+        <item>None (Super Floppy)</item>
+        <item>MBR (Standard)</item>
+        <item>GPT (Modern)</item>
+    </string-array>
+</resources>

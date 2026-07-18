@@ -1,0 +1,13 @@
+#define F2FS_TOOLS_VERSION "1.14.0"
+#define F2FS_TOOLS_DATE "2020-08-24"
+#define F2FS_MAJOR_VERSION 1
+#define F2FS_MINOR_VERSION 14
+
+#ifdef WITH_ANDROID
+#ifndef HAVE_LINUX_TYPES_H
+#define HAVE_LINUX_TYPES_H
+#endif
+#ifndef HAVE_SYS_IOCTL_H
+#define HAVE_SYS_IOCTL_H
+#endif
+#endif
