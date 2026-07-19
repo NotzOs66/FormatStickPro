@@ -1,0 +1,1 @@
+A professional tool for formatting USB devices directly from Android using native SCSI drivers. Supports NTFS, EXT4, EXFAT, F2FS, XFS and UDF. Requires USB OTG and a compatible device.
