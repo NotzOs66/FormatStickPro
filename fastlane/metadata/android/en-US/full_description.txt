@@ -1,0 +1,10 @@
+FormatStickPro is a professional Android application designed to format USB storage devices directly from your smartphone or tablet. It utilizes native SCSI drivers and industry-standard filesystem tools to provide a robust formatting experience similar to a desktop environment.
+
+Features:
+- Direct USB Control: Uses libusb and a custom SCSI translator to communicate directly with USB Mass Storage devices.
+- Wide Filesystem Support: NTFS, exFAT, Ext2/Ext3/Ext4, F2FS, XFS, UDF, and FAT32/FAT16/FAT12.
+- Partitioning: Supports MBR and GPT partition tables, or Super Floppy mode.
+- Customization: Choose cluster sizes and volume labels.
+- Safety: Integrated safeguards to ensure stable writes and proper buffer flushing.
+
+Note: Requires OTG support and a compatible USB drive. Native libraries are used for high-performance filesystem operations.
